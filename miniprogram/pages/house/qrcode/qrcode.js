@@ -1,4 +1,4 @@
-const { request } = require('../../utils/request')
+const { request } = require('../../../utils/request')
 
 Page({
   data: { inviteCode: '', qrData: '' },
@@ -26,7 +26,7 @@ Page({
           const houseId = getApp().globalData.currentHouseId
           const data = await request({ url: `/api/houses/${houseId}/invite-code`, method: 'POST' })
           this.setData({ inviteCode: data.invite_code, qrData: `invite:${data.invite_code}` })
-          wx.showToast({ title: '已重新生成' })
+          wx.showToast({ title: '已重新生�? })
         }
       }
     })

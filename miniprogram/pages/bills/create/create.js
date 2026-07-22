@@ -1,7 +1,7 @@
-const { request } = require('../../utils/request')
+const { request } = require('../../../utils/request')
 
 Page({
-  data: { title: '', totalAmount: '', categoryId: 0, splitType: '均摊', categories: [], members: [], billDate: new Date().toISOString().slice(0,10), splits: [], receiptUrl: '' },
+  data: { title: '', totalAmount: '', categoryId: 0, splitType: '均摊', categories: [], members: [], billDate: new Date().toISOString().slice(0,10), splits: [], receiptUrl: '', selectedCategoryName: '选择分类' },
   onShow() {
     this.loadOptions()
   },
@@ -16,10 +16,12 @@ Page({
     this.setData({
       categories,
       members: members.map(m => ({ ...m, weight: 1, days: 30, usage: 0, area: 1 })),
+      selectedCategoryName: categories[0]?.name || '选择分类',
     })
   },
   onCategoryChange(e) {
-    this.setData({ categoryId: Number(e.detail.value) })
+    const idx = Number(e.detail.value)
+    this.setData({ categoryId: idx, selectedCategoryName: this.data.categories[idx]?.name || '选择分类' })
   },
   onSplitTypeChange(e) {
     this.setData({ splitType: e.detail.value === '0' ? '均摊' : ['均摊','权重','天数','用量','面积','阶梯'][e.detail.value] })
@@ -35,12 +37,12 @@ Page({
   },
   async onSubmit() {
     const { title, totalAmount, categoryId, splitType, billDate, members } = this.data
-    if (!title || !totalAmount) return wx.showToast({ title: '请填写完整信息', icon: 'none' })
+    if (!title || !totalAmount) return wx.showToast({ title: '请填写完整信�?, icon: 'none' })
 
     const houseId = getApp().globalData.currentHouseId
     const total = Math.round(Number(totalAmount) * 100)
 
-    // Build splits — send parameters, not pre-computed amounts (server computes)
+    // Build splits �?send parameters, not pre-computed amounts (server computes)
     const splits = members.map(m => {
       let parameter = 1
       if (splitType === '权重') parameter = m.weight || 1

@@ -1,5 +1,5 @@
-const { billStore, loadBills, setBillFilter } = require('../../store/index')
-const { request } = require('../../utils/request')
+const { billStore, loadBills, setBillFilter } = require('../../../store/index')
+const { request } = require('../../../utils/request')
 
 Page({
   data: { categories: [] },

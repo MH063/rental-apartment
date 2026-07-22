@@ -2,6 +2,66 @@ import { Hono } from "hono"
 import type { AppEnv, AuthVariables } from "../types"
 import { authMiddleware } from "../middleware/auth"
 
+// After a challenge changes settlement_items.final_amount, sync back to bills and splits
+async function syncBillsFromChallenge(
+  db: D1Database, itemId: number, newAmount: number, houseId: number
+) {
+  const item = await db.prepare(`
+    SELECT si.payer_id, si.original_amount, s.start_date, s.end_date
+    FROM settlement_items si
+    JOIN settlements s ON s.id = si.settlement_id
+    WHERE si.id = ?
+  `).bind(itemId).first<{ payer_id: number; original_amount: number; start_date: string; end_date: string }>()
+  if (!item) return
+
+  const adjustment = item.original_amount - newAmount
+  if (adjustment === 0) return
+
+  // Find bills in the settlement's date range where the payer has splits
+  const bills = await db.prepare(`
+    SELECT DISTINCT b.id, b.total_amount FROM bills b
+    JOIN splits s ON s.bill_id = b.id
+    WHERE b.house_id = ? AND b.status != '草稿' AND s.user_id = ?
+      AND b.bill_date >= ? AND b.bill_date <= ?
+  `).bind(houseId, item.payer_id, item.start_date, item.end_date).all<{ id: number }>()
+  if (!bills.results.length) return
+
+  const billIds = bills.results.map(b => b.id)
+  const placeholders = billIds.map(() => "?").join(",")
+
+  // Get payer's splits in those bills
+  const payerSplits = await db.prepare(`
+    SELECT id, amount, bill_id FROM splits
+    WHERE bill_id IN (${placeholders}) AND user_id = ?
+  `).bind(...billIds, item.payer_id).all<{ id: number; amount: number; bill_id: number }>()
+  if (!payerSplits.results.length) return
+
+  // Prorate adjustment across payer's splits
+  const totalPayer = payerSplits.results.reduce((s, r) => s + r.amount, 0)
+  if (totalPayer === 0) return
+
+  const sorted = payerSplits.results.map(r => ({ ...r, reduction: Math.round(adjustment * r.amount / totalPayer) }))
+  // Fix rounding remainder on the largest split
+  const appliedTotal = sorted.reduce((s, r) => s + r.reduction, 0)
+  const remainder = adjustment - appliedTotal
+  if (remainder !== 0 && sorted.length > 0) sorted[0].reduction += remainder
+
+  for (const split of sorted) {
+    await db.prepare("UPDATE splits SET amount = amount - ? WHERE id = ?")
+      .bind(split.reduction, split.id).run()
+  }
+
+  // Recalculate bill totals
+  for (const bill of bills.results) {
+    const total = await db.prepare("SELECT SUM(amount) as total FROM splits WHERE bill_id = ?")
+      .bind(bill.id).first<{ total: number | null }>()
+    if (total?.total != null) {
+      await db.prepare("UPDATE bills SET total_amount = ?, version = version + 1, updated_at = datetime('now') WHERE id = ?")
+        .bind(total.total, bill.id).run()
+    }
+  }
+}
+
 export const challenges = new Hono<{ Bindings: AppEnv; Variables: AuthVariables }>()
 
 challenges.use("*", authMiddleware)
@@ -104,6 +164,8 @@ challenges.post("/challenges/:id/respond", async (c) => {
     await c.env.DB.prepare(
       "UPDATE settlement_items SET final_amount = ?, status = 'confirmed', version = version + 1, updated_at = datetime('now') WHERE id = ?"
     ).bind(adjusted_amount, challenge.item_id).run()
+
+    await syncBillsFromChallenge(c.env.DB, challenge.item_id, adjusted_amount, challenge.house_id)
 
     await c.env.DB.prepare(`
       INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
@@ -213,6 +275,8 @@ challenges.post("/challenges/:id/ruling", async (c) => {
       version = version + 1, updated_at = datetime('now')
     WHERE id = ?
   `).bind(finalAmount, challenge.item_id).run()
+
+  await syncBillsFromChallenge(c.env.DB, challenge.item_id, finalAmount, challenge.house_id)
 
   await c.env.DB.prepare(`
     INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)

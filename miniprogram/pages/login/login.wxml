@@ -1,0 +1,4 @@
+<view class="container">
+  <view class="logo">合租账单</view>
+  <button class="login-btn" open-type="getPhoneNumber" bindgetphonenumber="onLogin">微信一键登录</button>
+</view>

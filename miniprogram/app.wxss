@@ -1,0 +1,9 @@
+page {
+  --primary: #4f46e5;
+  --primary-light: #7c3aed;
+  --primary-gradient: linear-gradient(135deg, #4f46e5, #7c3aed, #8b5cf6);
+  --radius-card: 28rpx;
+  --radius-input: 16rpx;
+  --shadow-card: 0 24rpx 56rpx rgba(79, 70, 229, 0.22);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

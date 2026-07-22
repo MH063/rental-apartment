@@ -1,0 +1,6 @@
+.container { padding: 30rpx; }
+.toolbar { margin-bottom: 20rpx; }
+.toolbar input { background: #f5f5f5; padding: 20rpx; border-radius: 16rpx; font-size: 28rpx; }
+.bill-card { background: #fff; padding: 24rpx; border-radius: 28rpx; margin-bottom: 16rpx; box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06); display: flex; align-items: center; }
+.amount { margin-left: auto; font-weight: 600; color: #4f46e5; }
+.status { margin-left: 16rpx; font-size: 24rpx; color: #999; }

@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/bills/list/list",
+    "pages/bills/create/create",
+    "pages/bills/detail/detail",
+    "pages/bills/my/my",
+    "pages/settlement/create/create",
+    "pages/settlement/detail/detail",
+    "pages/settlement/history/history",
+    "pages/house/create/create",
+    "pages/house/join/join",
+    "pages/house/qrcode/qrcode",
+    "pages/members/members",
+    "pages/scan/scan",
+    "pages/stats/stats",
+    "pages/profile/profile",
+    "pages/config/config",
+    "pages/ranking/ranking",
+    "pages/reports/reports",
+    "pages/notification/notification"
+  ],
+  "tabBar": {
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页", "iconPath": "assets/tabbar/home.png", "selectedIconPath": "assets/tabbar/home-active.png" },
+      { "pagePath": "pages/bills/list/list", "text": "账单", "iconPath": "assets/tabbar/bill.png", "selectedIconPath": "assets/tabbar/bill-active.png" },
+      { "pagePath": "pages/scan/scan", "text": "扫一扫", "iconPath": "assets/tabbar/scan.png", "selectedIconPath": "assets/tabbar/scan-active.png" },
+      { "pagePath": "pages/stats/stats", "text": "统计", "iconPath": "assets/tabbar/stats.png", "selectedIconPath": "assets/tabbar/stats-active.png" },
+      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "assets/tabbar/profile.png", "selectedIconPath": "assets/tabbar/profile-active.png" }
+    ]
+  },
+  "window": {
+    "navigationBarTitleText": "合租账单",
+    "navigationBarTextStyle": "white",
+    "navigationBarBackgroundColor": "#4f46e5"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

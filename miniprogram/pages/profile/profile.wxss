@@ -1,0 +1,6 @@
+.container { padding: 30rpx; }
+.user-card { text-align: center; padding: 40rpx; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; }
+.nickname { font-size: 32rpx; font-weight: 600; display: block; margin-top: 16rpx; }
+.menu-item { display: block; background: #fff; padding: 28rpx; border-radius: 16rpx; margin-bottom: 12rpx; font-size: 28rpx; }
+.logout { margin-top: 40rpx; color: #ef4444; background: none; border: 2rpx solid #ef4444; border-radius: 16rpx; padding: 20rpx; }

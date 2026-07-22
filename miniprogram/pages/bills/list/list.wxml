@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="toolbar">
+    <input placeholder="搜索账单" bindinput="onSearch" />
+  </view>
+  <view wx:for="{{bills}}" wx:key="id" class="bill-card">
+    <text>{{item.title}}</text>
+    <text class="amount">{{item.total_amount / 100}} 元</text>
+    <text class="status">{{item.status}}</text>
+  </view>
+</view>

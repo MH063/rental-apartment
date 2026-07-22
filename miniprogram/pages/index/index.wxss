@@ -1,0 +1,6 @@
+.container { padding: 30rpx; }
+.header { background: linear-gradient(135deg, #4f46e5, #7c3aed, #8b5cf6); padding: 40rpx; border-radius: 28rpx; color: #fff; margin-bottom: 30rpx; }
+.title { font-size: 28rpx; opacity: .8; }
+.amount { font-size: 48rpx; font-weight: 700; display: block; margin-top: 10rpx; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
+.card { background: #fff; padding: 30rpx; border-radius: 28rpx; text-align: center; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); font-size: 28rpx; color: #333; }

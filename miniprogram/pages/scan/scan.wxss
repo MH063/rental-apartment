@@ -1,0 +1,2 @@
+.container { display: flex; align-items: center; justify-content: center; height: 60vh; }
+.tip { color: #999; font-size: 28rpx; }

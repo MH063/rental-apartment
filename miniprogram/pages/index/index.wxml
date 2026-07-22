@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="header">
+    <text class="title">本月汇总</text>
+    <text class="amount">{{summary?.total || '0.00'}} 元</text>
+  </view>
+  <view class="grid">
+    <navigator url="/pages/bills/create/create" class="card">录入账单</navigator>
+    <navigator url="/pages/settlement/create/create" class="card">生成结算</navigator>
+    <navigator url="/pages/members/members" class="card">成员管理</navigator>
+    <navigator url="/pages/bills/list/list" class="card">查看账单</navigator>
+  </view>
+</view>

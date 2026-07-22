@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="user-card">
+    <image class="avatar" src="{{user?.avatar || '/assets/default-avatar.png'}}" />
+    <text class="nickname">{{user?.nickname || '未登录'}}</text>
+  </view>
+  <navigator url="/pages/payment-methods/index" class="menu-item">支付方式</navigator>
+  <navigator url="/pages/config/config" class="menu-item">设置</navigator>
+  <button class="logout" bindtap="onLogout">退出登录</button>
+</view>

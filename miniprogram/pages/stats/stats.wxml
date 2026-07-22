@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="chart-card">
+    <text class="card-title">月度趋势</text>
+    <canvas canvas-id="trendChart"></canvas>
+  </view>
+  <view class="chart-card">
+    <text class="card-title">类目分布</text>
+    <canvas canvas-id="categoryChart"></canvas>
+  </view>
+</view>

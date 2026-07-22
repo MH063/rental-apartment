@@ -28,7 +28,12 @@ export function splitByArea(total: number, areas: number[]): number[] {
   return splitByWeight(total, areas)
 }
 
-export function splitByTier(total: number, usage: number[], tiers: { threshold: number; rate: number }[]): number[] {
+export interface SplitTier {
+  threshold: number
+  rate: number
+}
+
+export function splitByTier(total: number, usage: number[], tiers: SplitTier[]): number[] {
   const amounts = usage.map((u) => {
     let remaining = u
     let cost = 0

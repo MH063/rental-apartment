@@ -30,6 +30,6 @@ Page({
   },
   onChallenge(e) {
     const itemId = e.currentTarget.dataset.id
-    wx.navigateTo({ url: `/pages/settlement/challenge?id=${this.data.settlementId}&itemId=${itemId}` })
+    wx.navigateTo({ url: `/pages/settlement/challenge/challenge?id=${this.data.settlementId}&itemId=${itemId}` })
   },
 })

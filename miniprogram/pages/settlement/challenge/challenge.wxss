@@ -1,0 +1,7 @@
+.container { padding: 30rpx; }
+.card { background: #fff; padding: 30rpx; border-radius: 28rpx; box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06); }
+.label { font-size: 28rpx; font-weight: 500; display: block; margin: 20rpx 0 12rpx; }
+.label:first-child { margin-top: 0; }
+.input { width: 100%; border: 2rpx solid #e5e7eb; border-radius: 12rpx; padding: 20rpx; font-size: 28rpx; box-sizing: border-box; }
+textarea.input { height: 200rpx; }
+.btn { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; border: none; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; width: 100%; margin-top: 40rpx; }

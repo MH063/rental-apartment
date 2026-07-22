@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="card">
+    <text class="label">质疑原因</text>
+    <textarea class="input" placeholder="请说明质疑原因..." value="{{reason}}" bindinput="onReasonInput" />
+    <text class="label">质疑金额（可选）</text>
+    <input class="input" placeholder="请输入你认为正确的金额" value="{{amount}}" bindinput="onAmountInput" />
+    <button class="btn" bindtap="onSubmit">提交质疑</button>
+  </view>
+</view>

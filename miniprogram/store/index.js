@@ -1,7 +1,7 @@
 const { authStore, login, loadProfile, logout } = require('./auth')
 const { houseStore, loadHouses, loadMembers, loadCategories, switchHouse } = require('./house')
 const { billStore, loadBills, loadBillSummary, setBillFilter } = require('./bill')
-const { settlementStore, loadSettlements, loadSettlementDetail, loadStats, loadRanking } = require('./settlement')
+const { settlementStore, loadSettlements, loadSettlementDetail, createSettlement, loadStats, loadRanking } = require('./settlement')
 
 async function init() {
   const token = wx.getStorageSync('token') || ''
@@ -18,6 +18,6 @@ module.exports = {
   authStore, login, loadProfile, logout,
   houseStore, loadHouses, loadMembers, loadCategories, switchHouse,
   billStore, loadBills, loadBillSummary, setBillFilter,
-  settlementStore, loadSettlements, loadSettlementDetail, loadStats, loadRanking,
+  settlementStore, loadSettlements, loadSettlementDetail, createSettlement, loadStats, loadRanking,
   init,
 }

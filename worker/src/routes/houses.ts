@@ -88,7 +88,7 @@ houses.put("/houses/:id", async (c) => {
   return c.json({ success: true, data: house })
 })
 
-// Delete house (dorm leader only)
+// Delete house with cascade cleanup (dorm leader only)
 houses.delete("/houses/:id", async (c) => {
   const { userId } = c.var.user
   const houseId = Number(c.req.param("id"))
@@ -100,7 +100,38 @@ houses.delete("/houses/:id", async (c) => {
     return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
   }
 
+  // Cascade delete: settlement_challenges → settlement_items → settlements
+  const settlementIds = await c.env.DB.prepare("SELECT id FROM settlements WHERE house_id = ?").bind(houseId).all<{ id: number }>()
+  for (const s of settlementIds.results) {
+    const itemIds = await c.env.DB.prepare("SELECT id FROM settlement_items WHERE settlement_id = ?").bind(s.id).all<{ id: number }>()
+    for (const it of itemIds.results) {
+      await c.env.DB.prepare("DELETE FROM settlement_challenges WHERE item_id = ?").bind(it.id).run()
+      await c.env.DB.prepare("DELETE FROM partial_payments WHERE item_id = ?").bind(it.id).run()
+    }
+    await c.env.DB.prepare("DELETE FROM settlement_items WHERE settlement_id = ?").bind(s.id).run()
+  }
+  await c.env.DB.prepare("DELETE FROM settlements WHERE house_id = ?").bind(houseId).run()
+
+  // Cascade delete: splits → bills
+  const billIds = await c.env.DB.prepare("SELECT id FROM bills WHERE house_id = ?").bind(houseId).all<{ id: number }>()
+  for (const b of billIds.results) {
+    await c.env.DB.prepare("DELETE FROM splits WHERE bill_id = ?").bind(b.id).run()
+  }
+  await c.env.DB.prepare("DELETE FROM bills WHERE house_id = ?").bind(houseId).run()
+
+  // Remaining tables
+  await c.env.DB.prepare("DELETE FROM categories WHERE house_id = ?").bind(houseId).run()
+  await c.env.DB.prepare("DELETE FROM bill_templates WHERE house_id = ?").bind(houseId).run()
+  await c.env.DB.prepare("DELETE FROM cron_tasks WHERE house_id = ?").bind(houseId).run()
+  await c.env.DB.prepare("DELETE FROM operation_logs WHERE house_id = ?").bind(houseId).run()
+  await c.env.DB.prepare("DELETE FROM members WHERE house_id = ?").bind(houseId).run()
   await c.env.DB.prepare("DELETE FROM houses WHERE id = ?").bind(houseId).run()
+
+  await c.env.DB.prepare(`
+    INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id)
+    VALUES (?, ?, 'house_deleted', 'houses', ?)
+  `).bind(houseId, userId, houseId).run()
+
   return c.json({ success: true, data: {} })
 })
 

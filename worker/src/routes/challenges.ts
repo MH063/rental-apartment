@@ -3,6 +3,49 @@ import type { AppEnv, AuthVariables } from "../types"
 import { authMiddleware } from "../middleware/auth"
 import { settle } from "../algorithms/settlement"
 
+// Saga: capture state before mutations, restore on failure
+interface Snapshot { challengeStatus?: string; challengeHandler?: number | null; itemFinal?: number; itemStatus?: string; itemVersion?: number; splits: Array<{ id: number; amount: number }>; bills: Array<{ id: number; total: number }> }
+type Compensate = () => Promise<void>
+
+async function captureBefore(db: D1Database, itemId: number, challengeId: number): Promise<Snapshot> {
+  const ch = await db.prepare("SELECT status, handler_id FROM settlement_challenges WHERE id = ?").bind(challengeId).first<{ status: string; handler_id: number | null }>()
+  const item = await db.prepare("SELECT final_amount, status, version FROM settlement_items WHERE id = ?").bind(itemId).first<{ final_amount: number; status: string; version: number }>()
+
+  // Same bill/split scope as syncBillsFromChallenge
+  const scope = await db.prepare(`
+    SELECT si.payer_id, s.start_date, s.end_date, s.house_id FROM settlement_items si
+    JOIN settlements s ON s.id = si.settlement_id WHERE si.id = ?
+  `).bind(itemId).first<{ payer_id: number; start_date: string; end_date: string; house_id: number }>()
+
+  const splits: Array<{ id: number; amount: number }> = []
+  const bills: Array<{ id: number; total: number }> = []
+  if (scope) {
+    const billRows = await db.prepare(`
+      SELECT DISTINCT b.id FROM bills b JOIN splits s ON s.bill_id = b.id
+      WHERE b.house_id = ? AND b.status != '草稿' AND s.user_id = ? AND b.bill_date >= ? AND b.bill_date <= ?
+    `).bind(scope.house_id, scope.payer_id, scope.start_date, scope.end_date).all<{ id: number }>()
+    if (billRows.results.length) {
+      const ids = billRows.results.map(r => r.id)
+      const ph = ids.map(() => "?").join(",")
+      const s = await db.prepare(`SELECT id, amount FROM splits WHERE bill_id IN (${ph}) AND user_id = ?`).bind(...ids, scope.payer_id).all<{ id: number; amount: number }>()
+      splits.push(...s.results)
+      const b = await db.prepare(`SELECT id, total_amount FROM bills WHERE id IN (${ph})`).bind(...ids).all<{ id: number; total_amount: number }>()
+      bills.push(...b.results.map(r => ({ id: r.id, total: r.total_amount })))
+    }
+  }
+
+  return { challengeStatus: ch?.status, challengeHandler: ch?.handler_id, itemFinal: item?.final_amount, itemStatus: item?.status, itemVersion: item?.version, splits, bills }
+}
+
+function compensateSaga(db: D1Database, snap: Snapshot, itemId: number, challengeId: number): Compensate {
+  return async () => {
+    if (snap.challengeStatus) await db.prepare("UPDATE settlement_challenges SET status = ?, handler_id = ?, handled_at = datetime('now') WHERE id = ?").bind(snap.challengeStatus, snap.challengeHandler ?? null, challengeId).run()
+    if (snap.itemFinal != null) await db.prepare("UPDATE settlement_items SET final_amount = ?, status = ?, version = ?, updated_at = datetime('now') WHERE id = ?").bind(snap.itemFinal, snap.itemStatus ?? 'pending', snap.itemVersion ?? 1, itemId).run()
+    for (const s of snap.splits) await db.prepare("UPDATE splits SET amount = ? WHERE id = ?").bind(s.amount, s.id).run()
+    for (const b of snap.bills) await db.prepare("UPDATE bills SET total_amount = ?, version = version + 1, updated_at = datetime('now') WHERE id = ?").bind(b.total, b.id).run()
+  }
+}
+
 // Recalculate settlement items for all non-challenged items after bills change
 async function recalculateSettlement(db: D1Database, itemId: number) {
   const result = await db.prepare(`
@@ -247,25 +290,31 @@ challenges.post("/challenges/:id/respond", async (c) => {
   }
 
   if (action === "adjust" && adjusted_amount != null) {
-    await c.env.DB.prepare(`
-      UPDATE settlement_challenges SET status = 'resolved',
-        adjusted_amount = ?, handler_id = ?, handled_at = datetime('now')
-      WHERE id = ?
-    `).bind(adjusted_amount, userId, challengeId).run()
+    const snap = await captureBefore(c.env.DB, challenge.item_id, challengeId)
 
-    // Update settlement_item final_amount
-    await c.env.DB.prepare(
-      "UPDATE settlement_items SET final_amount = ?, status = 'confirmed', version = version + 1, updated_at = datetime('now') WHERE id = ?"
-    ).bind(adjusted_amount, challenge.item_id).run()
+    try {
+      await c.env.DB.prepare(`
+        UPDATE settlement_challenges SET status = 'resolved',
+          adjusted_amount = ?, handler_id = ?, handled_at = datetime('now')
+        WHERE id = ?
+      `).bind(adjusted_amount, userId, challengeId).run()
 
-    await syncBillsFromChallenge(c.env.DB, challenge.item_id, adjusted_amount, challenge.house_id)
-    await recalculateSettlement(c.env.DB, challenge.item_id)
+      await c.env.DB.prepare(
+        "UPDATE settlement_items SET final_amount = ?, status = 'confirmed', version = version + 1, updated_at = datetime('now') WHERE id = ?"
+      ).bind(adjusted_amount, challenge.item_id).run()
 
-    await c.env.DB.prepare(`
-      INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
-      VALUES (?, ?, 'challenge_adjusted', 'settlement_items', ?, ?)
-    `).bind(challenge.house_id, userId, challenge.item_id,
-      JSON.stringify({ final_amount: adjusted_amount })).run()
+      await syncBillsFromChallenge(c.env.DB, challenge.item_id, adjusted_amount, challenge.house_id)
+      await recalculateSettlement(c.env.DB, challenge.item_id)
+
+      await c.env.DB.prepare(`
+        INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
+        VALUES (?, ?, 'challenge_adjusted', 'settlement_items', ?, ?)
+      `).bind(challenge.house_id, userId, challenge.item_id,
+        JSON.stringify({ final_amount: adjusted_amount })).run()
+    } catch (err) {
+      await compensateSaga(c.env.DB, snap, challenge.item_id, challengeId)()
+      return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 500)
+    }
   } else {
     // Reject → escalate to dorm leader, keep open
     await c.env.DB.prepare(`
@@ -358,26 +407,33 @@ challenges.post("/challenges/:id/ruling", async (c) => {
       return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
   }
 
-  await c.env.DB.prepare(`
-    UPDATE settlement_challenges SET status = 'resolved',
-      adjusted_amount = ?, handler_id = ?, handled_at = datetime('now')
-    WHERE id = ?
-  `).bind(finalAmount, userId, challengeId).run()
+  const snap = await captureBefore(c.env.DB, challenge.item_id, challengeId)
 
-  await c.env.DB.prepare(`
-    UPDATE settlement_items SET final_amount = ?, status = 'confirmed',
-      version = version + 1, updated_at = datetime('now')
-    WHERE id = ?
-  `).bind(finalAmount, challenge.item_id).run()
+  try {
+    await c.env.DB.prepare(`
+      UPDATE settlement_challenges SET status = 'resolved',
+        adjusted_amount = ?, handler_id = ?, handled_at = datetime('now')
+      WHERE id = ?
+    `).bind(finalAmount, userId, challengeId).run()
 
-  await syncBillsFromChallenge(c.env.DB, challenge.item_id, finalAmount, challenge.house_id)
-  await recalculateSettlement(c.env.DB, challenge.item_id)
+    await c.env.DB.prepare(`
+      UPDATE settlement_items SET final_amount = ?, status = 'confirmed',
+        version = version + 1, updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(finalAmount, challenge.item_id).run()
 
-  await c.env.DB.prepare(`
-    INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
-    VALUES (?, ?, 'challenge_ruling', 'settlement_items', ?, ?)
-  `).bind(challenge.house_id, userId, challenge.item_id,
-    JSON.stringify({ ruling, final_amount: finalAmount })).run()
+    await syncBillsFromChallenge(c.env.DB, challenge.item_id, finalAmount, challenge.house_id)
+    await recalculateSettlement(c.env.DB, challenge.item_id)
 
-  return c.json({ success: true, data: {} })
+    await c.env.DB.prepare(`
+      INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
+      VALUES (?, ?, 'challenge_ruling', 'settlement_items', ?, ?)
+    `).bind(challenge.house_id, userId, challenge.item_id,
+      JSON.stringify({ ruling, final_amount: finalAmount })).run()
+
+    return c.json({ success: true, data: {} })
+  } catch (err) {
+    await compensateSaga(c.env.DB, snap, challenge.item_id, challengeId)()
+    return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 500)
+  }
 })

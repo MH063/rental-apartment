@@ -33,7 +33,11 @@ auth.post("/auth/login", async (c) => {
 
   await c.env.KV.put(`refresh:${user.id}`, refreshToken, { expirationTtl: 2592000 })
 
-  return c.json({ success: true, data: { access_token: accessToken, refresh_token: refreshToken, user_id: user.id } })
+  // Store refresh token family for revocation tracking
+  const tokenFamily = crypto.randomUUID()
+  await c.env.KV.put(`refresh:${user.id}`, JSON.stringify({ token: refreshToken, family: tokenFamily }), { expirationTtl: 2592000 })
+
+  return c.json({ success: true, data: { access_token: accessToken, refresh_token: refreshToken, user_id: user.id, token_family: tokenFamily } })
 })
 
 auth.post("/auth/refresh", async (c) => {
@@ -50,8 +54,13 @@ auth.post("/auth/refresh", async (c) => {
 
   const userId = payload.userId as number
 
-  const stored = await c.env.KV.get(`refresh:${userId}`)
-  if (stored !== refresh_token) {
+  const storedRaw = await c.env.KV.get(`refresh:${userId}`)
+  if (!storedRaw) return c.json({ success: false, error: "ERR_AUTH_REFRESH_FAILED" }, 401)
+
+  const stored = JSON.parse(storedRaw)
+  if (stored.token !== refresh_token) {
+    // Token reuse detected — revoke entire family
+    await c.env.KV.delete(`refresh:${userId}`)
     return c.json({ success: false, error: "ERR_AUTH_REFRESH_FAILED" }, 401)
   }
 
@@ -60,9 +69,15 @@ auth.post("/auth/refresh", async (c) => {
   const accessToken = await sign({ userId, openid: payload.openid }, c.env.JWT_SECRET, 7200)
   const newRefreshToken = await sign({ userId, openid: payload.openid, type: "refresh" }, c.env.JWT_SECRET, 2592000)
 
-  await c.env.KV.put(`refresh:${userId}`, newRefreshToken, { expirationTtl: 2592000 })
+  await c.env.KV.put(`refresh:${userId}`, JSON.stringify({ token: newRefreshToken, family: stored.family }), { expirationTtl: 2592000 })
 
   return c.json({ success: true, data: { access_token: accessToken, refresh_token: newRefreshToken } })
+})
+
+auth.post("/auth/logout", authMiddleware, async (c) => {
+  const { userId } = c.var.user
+  await c.env.KV.delete(`refresh:${userId}`)
+  return c.json({ success: true, data: {} })
 })
 
 auth.get("/user/profile", authMiddleware, async (c) => {

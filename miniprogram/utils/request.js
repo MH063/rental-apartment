@@ -69,4 +69,22 @@ function refreshToken() {
   })
 }
 
-module.exports = { request, API_BASE }
+function logout() {
+  const token = wx.getStorageSync(TOKEN_KEY)
+  if (token) {
+    wx.request({
+      url: API_BASE + '/api/auth/logout',
+      method: 'POST',
+      header: { Authorization: 'Bearer ' + token },
+      complete: () => {
+        wx.removeStorageSync(TOKEN_KEY)
+        wx.removeStorageSync(REFRESH_TOKEN_KEY)
+      },
+    })
+  } else {
+    wx.removeStorageSync(TOKEN_KEY)
+    wx.removeStorageSync(REFRESH_TOKEN_KEY)
+  }
+}
+
+module.exports = { request, API_BASE, logout }

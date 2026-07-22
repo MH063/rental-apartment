@@ -18,24 +18,31 @@ import { notify } from "./routes/notify"
 import { notifications } from "./routes/notifications"
 import { seed } from "./routes/seed"
 
-const app = new Hono<{ Bindings: AppEnv }>()
+export function createRouter(env?: { ENVIRONMENT?: string }) {
+  const app = new Hono<{ Bindings: AppEnv }>()
 
-app.route("/api", auth)
-app.route("/api", houses)
-app.route("/api", bills)
-app.route("/api", settlements)
-app.route("/api", challenges)
-app.route("/api", stats)
-app.route("/api", categories)
-app.route("/api", templates)
-app.route("/api", cronTasks)
-app.route("/api", budget)
-app.route("/api", budgetSuggestion)
-app.route("/api", ranking)
-app.route("/api", reports)
-app.route("/api", payments)
-app.route("/api", notify)
-app.route("/api", notifications)
-app.route("/api", seed)
+  app.route("/api", auth)
+  app.route("/api", houses)
+  app.route("/api", bills)
+  app.route("/api", settlements)
+  app.route("/api", challenges)
+  app.route("/api", stats)
+  app.route("/api", categories)
+  app.route("/api", templates)
+  app.route("/api", cronTasks)
+  app.route("/api", budget)
+  app.route("/api", budgetSuggestion)
+  app.route("/api", ranking)
+  app.route("/api", reports)
+  app.route("/api", payments)
+  app.route("/api", notify)
+  app.route("/api", notifications)
 
+  // Seed route only in non-production
+  if (env?.ENVIRONMENT !== "production") app.route("/api", seed)
+
+  return app
+}
+
+const app = createRouter()
 export default app

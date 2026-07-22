@@ -1,4 +1,4 @@
-const { request } = require('../../utils/request')
+const { request, logout } = require('../../utils/request')
 
 Page({
   data: { user: null, houses: [], currentHouseId: null },
@@ -23,8 +23,7 @@ Page({
       content: '确定要退出吗？',
       success(res) {
         if (res.confirm) {
-          wx.removeStorageSync('token')
-          wx.removeStorageSync('refresh_token')
+          logout()
           wx.redirectTo({ url: '/pages/login/login' })
         }
       }

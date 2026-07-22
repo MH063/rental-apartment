@@ -7,6 +7,7 @@ export interface AppEnv {
   WECHAT_APPID: string
   WECHAT_SECRET: string
   JWT_SECRET: string
+  ENVIRONMENT: string
 }
 
 export interface UserPayload {

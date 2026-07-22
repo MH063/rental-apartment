@@ -1,6 +1,99 @@
 import { Hono } from "hono"
 import type { AppEnv, AuthVariables } from "../types"
 import { authMiddleware } from "../middleware/auth"
+import { settle } from "../algorithms/settlement"
+
+// Recalculate settlement items for all non-challenged items after bills change
+async function recalculateSettlement(db: D1Database, itemId: number) {
+  const result = await db.prepare(`
+    SELECT s.id, s.house_id, s.start_date, s.end_date FROM settlement_items si
+    JOIN settlements s ON s.id = si.settlement_id WHERE si.id = ?
+  `).bind(itemId).first<{ id: number; house_id: number; start_date: string; end_date: string }>()
+  if (!result) return
+
+  const { id: settlementId, house_id, start_date, end_date } = result
+
+  // Re-fetch bills/splits with updated amounts
+  const bills = await db.prepare(`
+    SELECT id, creator_id, total_amount FROM bills
+    WHERE house_id = ? AND bill_date >= ? AND bill_date <= ?
+      AND status IN ('已确认', '争议中', '再次确认', '待支付', '已支付')
+  `).bind(house_id, start_date, end_date).all<{ id: number; creator_id: number; total_amount: number }>()
+  if (!bills.results.length) return
+
+  const billIds = bills.results.map(b => b.id)
+  const splits = await db.prepare(`
+    SELECT bill_id, user_id, amount FROM splits WHERE bill_id IN (${billIds.map(() => "?").join(",")})
+  `).bind(...billIds).all<{ bill_id: number; user_id: number; amount: number }>()
+
+  // Calculate net balances
+  const balanceMap = new Map<number, number>()
+  for (const bill of bills.results) {
+    balanceMap.set(bill.creator_id, (balanceMap.get(bill.creator_id) ?? 0) + bill.total_amount)
+  }
+  for (const split of splits.results) {
+    balanceMap.set(split.user_id, (balanceMap.get(split.user_id) ?? 0) - split.amount)
+  }
+
+  const balances = Array.from(balanceMap.entries())
+    .filter(([_, amount]) => amount !== 0)
+    .map(([userId, amount]) => ({ userId, amount }))
+  if (!balances.length) return
+
+  const newTransfers = settle(balances)
+
+  // Get existing items (keep challenged ones to preserve their final_amount)
+  const existing = await db.prepare(
+    "SELECT id, payer_id, payee_id, original_amount, status FROM settlement_items WHERE settlement_id = ?"
+  ).bind(settlementId).all<{ id: number; payer_id: number; payee_id: number; original_amount: number; status: string }>()
+
+  const challengedItemIds = new Set(
+    (await db.prepare("SELECT DISTINCT item_id FROM settlement_challenges WHERE status = 'resolved'")
+      .all<{ item_id: number }>()).results.map(r => r.item_id)
+  )
+
+  // Delete non-challenged items that no longer match
+  const existingMap = new Map<string, { id: number; original_amount: number }>()
+  for (const ex of existing.results) {
+    if (challengedItemIds.has(ex.id)) continue
+    const key = `${ex.payer_id}-${ex.payee_id}`
+    existingMap.set(key, ex)
+  }
+
+  const insertStmt = db.prepare(
+    "INSERT INTO settlement_items (settlement_id, payer_id, payee_id, original_amount, final_amount) VALUES (?, ?, ?, ?, ?)"
+  )
+  const usedKeys = new Set<string>()
+
+  for (const t of newTransfers) {
+    const key = `${t.from}-${t.to}`
+    usedKeys.add(key)
+    const match = existingMap.get(key)
+
+    if (match && match.original_amount === t.amount) {
+      // No change needed
+      continue
+    }
+    if (match) {
+      // Update amount
+      await db.prepare(
+        "UPDATE settlement_items SET original_amount = ?, final_amount = ?, updated_at = datetime('now') WHERE id = ?"
+      ).bind(t.amount, t.amount, match.id).run()
+    } else {
+      // New item
+      await insertStmt.bind(settlementId, t.from, t.to, t.amount, t.amount).run()
+    }
+  }
+
+  // Remove items that no longer have a corresponding transfer
+  for (const ex of existing.results) {
+    if (challengedItemIds.has(ex.id)) continue
+    const key = `${ex.payer_id}-${ex.payee_id}`
+    if (!usedKeys.has(key)) {
+      await db.prepare("DELETE FROM settlement_items WHERE id = ?").bind(ex.id).run()
+    }
+  }
+}
 
 // After a challenge changes settlement_items.final_amount, sync back to bills and splits
 async function syncBillsFromChallenge(
@@ -166,6 +259,7 @@ challenges.post("/challenges/:id/respond", async (c) => {
     ).bind(adjusted_amount, challenge.item_id).run()
 
     await syncBillsFromChallenge(c.env.DB, challenge.item_id, adjusted_amount, challenge.house_id)
+    await recalculateSettlement(c.env.DB, challenge.item_id)
 
     await c.env.DB.prepare(`
       INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)
@@ -277,6 +371,7 @@ challenges.post("/challenges/:id/ruling", async (c) => {
   `).bind(finalAmount, challenge.item_id).run()
 
   await syncBillsFromChallenge(c.env.DB, challenge.item_id, finalAmount, challenge.house_id)
+  await recalculateSettlement(c.env.DB, challenge.item_id)
 
   await c.env.DB.prepare(`
     INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id, after_snapshot)

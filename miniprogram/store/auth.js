@@ -23,7 +23,7 @@ async function login(code) {
 
 async function loadProfile() {
   try {
-    const user = await request({ url: '/user/profile' })
+    const user = await request({ url: '/api/user/profile' })
     authStore.setState({ user })
   } catch { /* ignore */ }
 }

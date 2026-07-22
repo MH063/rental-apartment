@@ -2,4 +2,10 @@ var money = function(cents) {
   if (!cents) return '0.00'
   return (cents / 100).toFixed(2)
 }
-module.exports = { money: money }
+
+var monthShort = function(monthStr) {
+  if (!monthStr) return ''
+  return monthStr.slice(5)
+}
+
+module.exports = { money: money, monthShort: monthShort }

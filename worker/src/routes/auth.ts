@@ -12,14 +12,18 @@ auth.post("/auth/login", async (c) => {
     return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
   }
 
-  const wechat = createWechatAPI(c.env)
-  const session = await wechat.code2Session(code)
+  let openid: string
 
-  if (!session.openid) {
-    return c.json({ success: false, error: "ERR_AUTH_REFRESH_FAILED" }, 401)
+  if (c.env.ENVIRONMENT === 'development') {
+    openid = `dev_${code}`
+  } else {
+    const wechat = createWechatAPI(c.env)
+    const session = await wechat.code2Session(code)
+    if (!session.openid) {
+      return c.json({ success: false, error: "ERR_AUTH_REFRESH_FAILED" }, 401)
+    }
+    openid = session.openid
   }
-
-  const openid = session.openid
 
   let user = await c.env.DB.prepare("SELECT id FROM users WHERE wechat_openid = ?").bind(openid).first<{ id: number }>()
 

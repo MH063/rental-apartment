@@ -1,8 +1,48 @@
 import { Hono } from "hono"
-import type { AppEnv } from "../types"
+import type { AppEnv, AuthVariables } from "../types"
+import { authMiddleware } from "../middleware/auth"
 
-export const payments = new Hono<{ Bindings: AppEnv }>()
-payments.get("/payment-methods", (c) => c.json({ success: true, data: [] }))
-payments.post("/payment-methods", (c) => c.json({ success: true, data: {} }))
-payments.put("/payment-methods/:id", (c) => c.json({ success: true, data: {} }))
-payments.delete("/payment-methods/:id", (c) => c.json({ success: true, data: {} }))
+export const payments = new Hono<{ Bindings: AppEnv; Variables: AuthVariables }>()
+payments.use("*", authMiddleware)
+
+payments.get("/payment-methods", async (c) => {
+  const { userId } = c.var.user
+  const list = await c.env.DB.prepare(
+    "SELECT id, type, account, is_default FROM payment_methods WHERE user_id = ?"
+  ).bind(userId).all()
+  return c.json({ success: true, data: list.results })
+})
+
+payments.post("/payment-methods", async (c) => {
+  const { userId } = c.var.user
+  const { type, account } = await c.req.json<{ type: string; account: string }>()
+  if (!type || !account) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
+
+  const result = await c.env.DB.prepare(
+    "INSERT INTO payment_methods (user_id, type, account) VALUES (?, ?, ?)"
+  ).bind(userId, type, account).run()
+
+  const pm = await c.env.DB.prepare("SELECT id, type, account, is_default FROM payment_methods WHERE id = ?")
+    .bind(Number(result.meta.last_row_id)).first()
+  return c.json({ success: true, data: pm })
+})
+
+payments.put("/payment-methods/:id", async (c) => {
+  const { userId } = c.var.user
+  const id = Number(c.req.param("id"))
+  const { type, account, is_default } = await c.req.json<{ type?: string; account?: string; is_default?: number }>()
+
+  await c.env.DB.prepare(
+    "UPDATE payment_methods SET type = COALESCE(?, type), account = COALESCE(?, account), is_default = COALESCE(?, is_default) WHERE id = ? AND user_id = ?"
+  ).bind(type ?? null, account ?? null, is_default ?? null, id, userId).run()
+
+  const pm = await c.env.DB.prepare("SELECT id, type, account, is_default FROM payment_methods WHERE id = ?").bind(id).first()
+  return c.json({ success: true, data: pm })
+})
+
+payments.delete("/payment-methods/:id", async (c) => {
+  const { userId } = c.var.user
+  await c.env.DB.prepare("DELETE FROM payment_methods WHERE id = ? AND user_id = ?")
+    .bind(Number(c.req.param("id")), userId).run()
+  return c.json({ success: true, data: {} })
+})

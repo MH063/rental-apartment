@@ -20,7 +20,8 @@
     "pages/ranking/ranking",
     "pages/reports/reports",
     "pages/notification/notification",
-    "pages/payment-methods/index/index"
+    "pages/payment-methods/index/index",
+    "pages/settlement/challenge/challenge"
   ],
   "tabBar": {
     "list": [

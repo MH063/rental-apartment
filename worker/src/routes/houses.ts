@@ -157,7 +157,40 @@ houses.get("/houses/:id/members", async (c) => {
   return c.json({ success: true, data: members.results })
 })
 
-// Join house with invite code
+// Join house by invite code (no house id needed)
+houses.post("/houses/join", async (c) => {
+  const { userId } = c.var.user
+  const { invite_code } = await c.req.json<{ invite_code: string }>()
+  if (!invite_code) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
+
+  const house = await c.env.DB.prepare(
+    "SELECT id, invite_code, invite_code_expires_at FROM houses WHERE invite_code = ?"
+  ).bind(invite_code).first<{ id: number; invite_code: string; invite_code_expires_at: string }>()
+  if (!house) return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 404)
+
+  if (isExpired(house.invite_code_expires_at)) {
+    return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
+  }
+
+  const existing = await c.env.DB.prepare(
+    "SELECT id, status FROM members WHERE house_id = ? AND user_id = ?"
+  ).bind(house.id, userId).first<{ id: number; status: string }>()
+
+  if (existing) {
+    if (existing.status === "active") {
+      return c.json({ success: false, error: "ERR_BILL_DUPLICATE" }, 400)
+    }
+    await c.env.DB.prepare("UPDATE members SET status = 'active', left_at = NULL WHERE id = ?").bind(existing.id).run()
+  } else {
+    await c.env.DB.prepare(
+      "INSERT INTO members (house_id, user_id, role) VALUES (?, ?, '普通成员')"
+    ).bind(house.id, userId).run()
+  }
+
+  return c.json({ success: true, data: { house_id: house.id } })
+})
+
+// Join house with invite code (by house id)
 houses.post("/houses/:id/join", async (c) => {
   const { userId } = c.var.user
   const houseId = Number(c.req.param("id"))

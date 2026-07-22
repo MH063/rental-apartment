@@ -3,7 +3,41 @@
     <image class="avatar" src="{{user?.avatar || '/assets/default-avatar.png'}}" />
     <text class="nickname">{{user?.nickname || '未登录'}}</text>
   </view>
-  <navigator url="/pages/payment-methods/index" class="menu-item">支付方式</navigator>
-  <navigator url="/pages/config/config" class="menu-item">设置</navigator>
+
+  <view class="menu-section">
+    <text class="section-title">当前房屋</text>
+    <view wx:for="{{houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
+      <text>{{item.name}}</text>
+      <text class="check" wx:if="{{item.id === currentHouseId}}">✓</text>
+    </view>
+  </view>
+
+  <view class="menu-section">
+    <navigator url="/pages/payment-methods/index" class="menu-item">
+      <text>支付方式</text>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/house/create/create" class="menu-item">
+      <text>创建房屋</text>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/house/join/join" class="menu-item">
+      <text>加入房屋</text>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/config/config" class="menu-item">
+      <text>设置</text>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/bills/my/my" class="menu-item">
+      <text>我的账单</text>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/notification/notification" class="menu-item">
+      <text>通知</text>
+      <text class="arrow">›</text>
+    </navigator>
+  </view>
+
   <button class="logout" bindtap="onLogout">退出登录</button>
 </view>

@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="form">
+    <view class="field">
+      <text class="label">房屋名称</text>
+      <input class="input" placeholder="例如：幸福小区3栋503" model:value="{{name}}" />
+    </view>
+    <view class="field">
+      <text class="label">地址（可选）</text>
+      <input class="input" placeholder="小区名称或地址" model:value="{{address}}" />
+    </view>
+    <button class="btn-primary" bindtap="onSubmit">创建房屋</button>
+  </view>
+</view>

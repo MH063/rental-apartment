@@ -1,0 +1,11 @@
+<view class="container">
+  <view class="header-bar">
+    <text class="title">通知中心</text>
+    <button class="read-btn" bindtap="onRead">全部已读</button>
+  </view>
+  <view wx:for="{{notifications}}" wx:key="id" class="notif-card">
+    <text class="notif-text">{{item.content || item.message}}</text>
+    <text class="notif-time">{{item.created_at || item.time}}</text>
+  </view>
+  <view wx:if="{{notifications.length === 0}}" class="empty">暂无通知</view>
+</view>

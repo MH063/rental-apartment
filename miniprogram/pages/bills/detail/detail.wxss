@@ -1,0 +1,6 @@
+.container { padding: 30rpx; }
+.card { background: #fff; padding: 40rpx; border-radius: 28rpx; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); }
+.bill-title { font-size: 36rpx; font-weight: 700; display: block; }
+.bill-amount { font-size: 48rpx; font-weight: 800; color: #4f46e5; display: block; margin: 16rpx 0; }
+.meta text { display: block; font-size: 26rpx; color: #999; margin-top: 8rpx; }
+.btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; margin-top: 32rpx; width: 100%; }

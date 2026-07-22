@@ -1,0 +1,10 @@
+.container { padding: 30rpx; }
+.filter-bar { display: flex; align-items: center; justify-content: center; gap: 16rpx; margin-bottom: 24rpx; background: #fff; padding: 20rpx; border-radius: 16rpx; }
+.filter-bar text { font-size: 26rpx; color: #4f46e5; }
+.sep { color: #ccc; }
+.report-card { background: #fff; padding: 24rpx; border-radius: 28rpx; margin-bottom: 12rpx; box-shadow: 0 4rpx 16rpx rgba(0,0,0,.04); }
+.report-header { display: flex; justify-content: space-between; align-items: center; }
+.r-title { font-size: 28rpx; font-weight: 500; }
+.r-amount { font-size: 32rpx; font-weight: 700; color: #4f46e5; }
+.r-meta { font-size: 24rpx; color: #999; margin-top: 8rpx; display: block; }
+.empty { text-align: center; padding: 80rpx; color: #ccc; font-size: 28rpx; }

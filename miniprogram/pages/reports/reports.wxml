@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="filter-bar">
+    <picker mode="date" bindchange="onDateChange" data-field="startDate">
+      <text>从：{{startDate}}</text>
+    </picker>
+    <text class="sep">~</text>
+    <picker mode="date" bindchange="onDateChange" data-field="endDate">
+      <text>到：{{endDate}}</text>
+    </picker>
+  </view>
+  <view wx:for="{{reports}}" wx:key="id" class="report-card">
+    <view class="report-header">
+      <text class="r-title">{{item.title}}</text>
+      <text class="r-amount">{{(item.total_amount / 100).toFixed(2)}} 元</text>
+    </view>
+    <text class="r-meta">{{item.bill_date}} · {{item.category_name || '未分类'}} · {{item.status}}</text>
+  </view>
+  <view wx:if="{{reports.length === 0}}" class="empty">暂无数据</view>
+</view>

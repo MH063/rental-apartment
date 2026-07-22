@@ -1,6 +1,15 @@
 .container { padding: 30rpx; }
-.header { background: linear-gradient(135deg, #4f46e5, #7c3aed, #8b5cf6); padding: 40rpx; border-radius: 28rpx; color: #fff; margin-bottom: 30rpx; }
-.title { font-size: 28rpx; opacity: .8; }
-.amount { font-size: 48rpx; font-weight: 700; display: block; margin-top: 10rpx; }
+.header { margin-bottom: 24rpx; }
+.house-name { font-size: 40rpx; font-weight: 800; color: #333; display: block; }
+.subtitle { font-size: 26rpx; color: #999; margin-top: 6rpx; display: block; }
+.summary-card { background: linear-gradient(135deg, #4f46e5, #7c3aed, #8b5cf6); padding: 32rpx; border-radius: 28rpx; color: #fff; margin-bottom: 30rpx; }
+.summary-label { font-size: 26rpx; opacity: .8; display: block; }
+.summary-amount { font-size: 52rpx; font-weight: 800; display: block; margin-top: 8rpx; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
-.card { background: #fff; padding: 30rpx; border-radius: 28rpx; text-align: center; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); font-size: 28rpx; color: #333; }
+.card { background: #fff; padding: 30rpx; border-radius: 28rpx; text-align: center; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); position: relative; }
+.card-icon { font-size: 48rpx; display: block; }
+.card-text { font-size: 26rpx; color: #333; margin-top: 12rpx; display: block; }
+.card-badge { position: absolute; top: 12rpx; right: 12rpx; background: #ef4444; color: #fff; font-size: 20rpx; min-width: 32rpx; height: 32rpx; line-height: 32rpx; text-align: center; border-radius: 16rpx; }
+.onboard { margin-top: 32rpx; display: flex; flex-direction: column; gap: 16rpx; }
+.btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; text-align: center; }
+.btn-outline { background: none; border: 2rpx solid #4f46e5; color: #4f46e5; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; text-align: center; }

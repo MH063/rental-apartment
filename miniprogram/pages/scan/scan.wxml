@@ -1,3 +1,8 @@
 <view class="container">
-  <text class="tip">扫码加入房屋</text>
+  <view class="scan-area">
+    <text class="scan-icon">📷</text>
+    <text class="scan-tip">正在启动扫码...</text>
+    <text class="scan-desc">扫描室友分享的邀请码二维码</text>
+  </view>
+  <navigator url="/pages/house/join/join" class="manual-link">手动输入邀请码</navigator>
 </view>

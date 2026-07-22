@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="card" wx:if="{{settlement}}">
+    <text class="title">结算 #{{settlement.id}}</text>
+    <text class="status-badge {{settlement.status}}">{{settlement.status}}</text>
+    <text class="date">{{settlement.created_at}}</text>
+  </view>
+  <view class="items">
+    <view wx:for="{{items}}" wx:key="id" class="item-card">
+      <view class="item-header">
+        <text class="from">{{item.from_name}} → {{item.to_name}}</text>
+        <text class="item-amount">{{(item.amount / 100).toFixed(2)}} 元</text>
+      </view>
+      <text class="item-status">{{item.status}}</text>
+      <view class="item-actions" wx:if="{{settlement?.status === 'pending'}}">
+        <button bindtap="onItemConfirm" data-id="{{item.id}}" class="tag">确认</button>
+        <button bindtap="onItemTransfer" data-id="{{item.id}}" class="tag">已转账</button>
+        <button bindtap="onChallenge" data-id="{{item.id}}" class="tag danger">质疑</button>
+      </view>
+    </view>
+  </view>
+  <button wx:if="{{settlement?.status === 'pending'}}" class="btn-primary" bindtap="onConfirm">全部确认</button>
+</view>

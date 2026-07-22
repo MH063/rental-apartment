@@ -1,0 +1,7 @@
+.container { padding: 60rpx 30rpx; }
+.card { background: #fff; padding: 40rpx; border-radius: 28rpx; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); text-align: center; }
+.title { font-size: 36rpx; font-weight: 700; display: block; }
+.desc { font-size: 26rpx; color: #999; margin: 24rpx 0; display: block; line-height: 1.6; }
+.btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; width: 100%; margin-top: 16rpx; }
+.btn-primary[disabled] { opacity: .6; }
+.link { display: block; margin-top: 32rpx; color: #4f46e5; font-size: 28rpx; }

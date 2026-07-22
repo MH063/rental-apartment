@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="header-card">
+    <text class="title">{{house?.name || '房屋名称'}}</text>
+    <navigator url="/pages/house/qrcode/qrcode" class="link">邀请码</navigator>
+  </view>
+  <view wx:for="{{members}}" wx:key="user_id" class="member-card">
+    <image class="avatar" src="{{item.avatar || '/assets/default-avatar.png'}}" />
+    <view class="info">
+      <text class="name">{{item.nickname || item.user_name}}</text>
+      <text class="role">{{item.role}}</text>
+    </view>
+    <view class="ops" wx:if="{{house?.my_role === '寝室长' && item.role !== '寝室长'}}">
+      <button class="tag" bindtap="onChangeRole" data-user-id="{{item.user_id}}" data-role="{{item.role === '普通成员' ? '寝室长' : '普通成员'}}">{{item.role === '普通成员' ? '设为寝室长' : '降为成员'}}</button>
+      <button class="tag danger" bindtap="onRemove" data-user-id="{{item.user_id}}">移除</button>
+    </view>
+  </view>
+</view>

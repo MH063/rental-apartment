@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="filter-bar">
+    <picker mode="date" bindchange="onDateChange" data-field="startDate">
+      <text>开始：{{startDate || '选择'}}</text>
+    </picker>
+    <text class="sep">~</text>
+    <picker mode="date" bindchange="onDateChange" data-field="endDate">
+      <text>结束：{{endDate || '选择'}}</text>
+    </picker>
+  </view>
+  <view wx:for="{{ranking}}" wx:key="id" class="rank-item">
+    <text class="rank-num">{{index + 1}}</text>
+    <image class="avatar" src="{{item.avatar || '/assets/default-avatar.png'}}" />
+    <text class="name">{{item.nickname || item.id}}</text>
+    <text class="amount">{{(item.total_spent / 100).toFixed(2)}} 元</text>
+  </view>
+  <view wx:if="{{ranking.length === 0}}" class="empty">暂无数据</view>
+</view>

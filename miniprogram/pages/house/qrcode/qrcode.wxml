@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="card">
+    <text class="title">邀请码</text>
+    <text class="code">{{inviteCode}}</text>
+    <text class="tip">将此邀请码分享给室友</text>
+    <view class="actions">
+      <button class="btn-outline" bindtap="onShare">复制邀请码</button>
+      <button class="btn-outline" bindtap="onRenew">重新生成</button>
+    </view>
+    <navigator url="/pages/house/join/join" class="link">我也要加入其他房屋</navigator>
+  </view>
+</view>

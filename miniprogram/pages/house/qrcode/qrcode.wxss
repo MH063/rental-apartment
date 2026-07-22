@@ -1,0 +1,8 @@
+.container { padding: 60rpx 30rpx; }
+.card { background: #fff; padding: 40rpx; border-radius: 28rpx; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); text-align: center; }
+.title { font-size: 28rpx; color: #999; display: block; }
+.code { font-size: 64rpx; font-weight: 800; color: #4f46e5; letter-spacing: 12rpx; display: block; margin: 24rpx 0; }
+.tip { font-size: 26rpx; color: #999; display: block; margin-bottom: 32rpx; }
+.actions { display: flex; gap: 20rpx; justify-content: center; }
+.btn-outline { background: none; border: 2rpx solid #4f46e5; color: #4f46e5; border-radius: 16rpx; padding: 16rpx 40rpx; font-size: 28rpx; }
+.link { display: block; margin-top: 32rpx; font-size: 26rpx; color: #4f46e5; }

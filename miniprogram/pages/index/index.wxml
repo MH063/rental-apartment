@@ -1,12 +1,40 @@
 <view class="container">
-  <view class="header">
-    <text class="title">本月汇总</text>
-    <text class="amount">{{summary?.total || '0.00'}} 元</text>
+  <view class="header" wx:if="{{house}}">
+    <text class="house-name">{{house.name}}</text>
+    <text class="subtitle">{{house.address || '点击下方功能开始使用'}}</text>
   </view>
+  <view class="header" wx:else>
+    <text class="house-name">欢迎使用合租账单</text>
+    <text class="subtitle">请先创建或加入一个房屋</text>
+  </view>
+
+  <view class="summary-card" wx:if="{{summary}}">
+    <text class="summary-label">本月支出</text>
+    <text class="summary-amount">{{summary?.total || '0.00'}} 元</text>
+  </view>
+
   <view class="grid">
-    <navigator url="/pages/bills/create/create" class="card">录入账单</navigator>
-    <navigator url="/pages/settlement/create/create" class="card">生成结算</navigator>
-    <navigator url="/pages/members/members" class="card">成员管理</navigator>
-    <navigator url="/pages/bills/list/list" class="card">查看账单</navigator>
+    <navigator url="/pages/bills/create/create" class="card">
+      <text class="card-icon">📝</text>
+      <text class="card-text">录入账单</text>
+    </navigator>
+    <navigator url="/pages/bills/list/list" class="card">
+      <text class="card-icon">📋</text>
+      <text class="card-text">查看账单</text>
+      <text class="card-badge" wx:if="{{unpaidCount > 0}}">{{unpaidCount}}</text>
+    </navigator>
+    <navigator url="/pages/settlement/create/create" class="card">
+      <text class="card-icon">💰</text>
+      <text class="card-text">生成结算</text>
+    </navigator>
+    <navigator url="/pages/members/members" class="card">
+      <text class="card-icon">👥</text>
+      <text class="card-text">成员管理</text>
+    </navigator>
+  </view>
+
+  <view wx:if="{{!house}}" class="onboard">
+    <navigator url="/pages/house/create/create" class="btn-primary">创建房屋</navigator>
+    <navigator url="/pages/house/join/join" class="btn-outline">加入房屋</navigator>
   </view>
 </view>

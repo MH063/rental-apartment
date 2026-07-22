@@ -1,0 +1,6 @@
+.container { padding: 30rpx; }
+.bill-card { background: #fff; padding: 24rpx; border-radius: 28rpx; margin-bottom: 16rpx; box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06); display: flex; align-items: center; }
+.title { font-size: 28rpx; flex: 1; }
+.amount { font-weight: 600; color: #4f46e5; margin-left: auto; font-size: 28rpx; }
+.status { margin-left: 16rpx; font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 8rpx; background: #f5f5f5; color: #999; }
+.empty { text-align: center; padding: 80rpx; color: #ccc; font-size: 28rpx; }

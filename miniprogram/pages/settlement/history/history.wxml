@@ -1,0 +1,9 @@
+<view class="container">
+  <view wx:for="{{settlements}}" wx:key="id" class="settlement-card" bindtap="onTap" data-id="{{item.id}}">
+    <text class="s-title">结算 #{{item.id}}</text>
+    <text class="s-status {{item.status}}">{{item.status}}</text>
+    <text class="s-date">{{item.created_at}}</text>
+  </view>
+  <navigator url="/pages/settlement/create/create" class="btn-primary">生成新结算</navigator>
+  <view wx:if="{{settlements.length === 0}}" class="empty">暂无结算记录</view>
+</view>

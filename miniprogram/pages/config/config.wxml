@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="section">
+    <text class="section-title">我的房屋</text>
+    <view wx:for="{{houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
+      <text>{{item.name}}</text>
+      <text class="check" wx:if="{{item.id === currentHouseId}}">✓</text>
+    </view>
+    <navigator url="/pages/house/create/create" class="add-link">+ 创建新房屋</navigator>
+    <navigator url="/pages/house/join/join" class="add-link">+ 加入房屋</navigator>
+  </view>
+  <view class="section">
+    <text class="section-title">预算设置</text>
+    <view wx:for="{{categories}}" wx:key="id" class="budget-item">
+      <text>{{item.name}}</text>
+      <input class="budget-input" placeholder="月预算(元)" type="digit" bindblur="onSetBudget" data-cat-id="{{item.id}}" />
+    </view>
+  </view>
+</view>

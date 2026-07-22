@@ -1,4 +1,8 @@
 <view class="container">
   <view class="logo">合租账单</view>
-  <button class="login-btn" open-type="getPhoneNumber" bindgetphonenumber="onLogin">微信一键登录</button>
+  <text class="subtitle">室友分摊，一目了然</text>
+  <button class="login-btn" bindtap="onLogin" disabled="{{loading}}">
+    <text wx:if="{{loading}}">登录中...</text>
+    <text wx:else>微信一键登录</text>
+  </button>
 </view>

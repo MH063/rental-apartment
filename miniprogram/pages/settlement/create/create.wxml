@@ -1,0 +1,11 @@
+<view class="container">
+  <view class="card">
+    <text class="title">生成结算</text>
+    <text class="desc">系统将统计所有已确认的账单，自动计算每人应付/应收金额</text>
+    <button class="btn-primary" bindtap="onCreate" disabled="{{loading}}">
+      <text wx:if="{{loading}}">计算中...</text>
+      <text wx:else>开始结算</text>
+    </button>
+    <navigator url="/pages/settlement/history/history" class="link">查看结算历史</navigator>
+  </view>
+</view>

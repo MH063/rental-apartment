@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="card">
+    <text class="title">加入合租房屋</text>
+    <text class="desc">输入寝室长分享的6位邀请码</text>
+    <view class="code-inputs">
+      <input class="input" placeholder="000000" maxlength="6" model:value="{{code}}" />
+    </view>
+    <button class="btn-primary" bindtap="onLookup" disabled="{{loading}}">
+      <text wx:if="{{loading}}">验证中...</text>
+      <text wx:else>加入房屋</text>
+    </button>
+  </view>
+</view>

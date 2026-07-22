@@ -1,0 +1,38 @@
+<view class="container">
+  <view class="form">
+    <view class="field">
+      <text class="label">账单标题</text>
+      <input class="input" placeholder="例如：7月电费" model:value="{{title}}" />
+    </view>
+    <view class="field">
+      <text class="label">金额（元）</text>
+      <input class="input" placeholder="0.00" type="digit" model:value="{{totalAmount}}" />
+    </view>
+    <view class="field">
+      <text class="label">日期</text>
+      <picker mode="date" value="{{billDate}}" bindchange="e => setData({ billDate: e.detail.value })">
+        <view class="picker">{{billDate}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="label">分类</text>
+      <picker mode="selector" range="{{categories}}" range-key="name" bindchange="onCategoryChange">
+        <view class="picker">{{categories[categoryId]?.name || '选择分类'}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="label">分摊方式</text>
+      <picker mode="selector" range="{{['均摊','权重','天数','用量','面积','阶梯']}}" bindchange="onSplitTypeChange">
+        <view class="picker">{{splitType}}</view>
+      </picker>
+    </view>
+    <view class="field" wx:if="{{splitType !== '均摊'}}">
+      <text class="label">分摊明细（{{splitType}}）</text>
+      <view wx:for="{{members}}" wx:key="user_id" class="split-row">
+        <text>{{item.nickname || item.user_name}}</text>
+        <input class="split-input" type="digit" value="{{item.weight || item.days || item.usage || item.area}}" bindinput="onSplitChange" data-field="{{splitType === '权重' ? 'weight' : splitType === '天数' ? 'days' : splitType === '用量' ? 'usage' : 'area'}}" data-idx="{{index}}" />
+      </view>
+    </view>
+    <button class="btn-primary" bindtap="onSubmit">创建账单</button>
+  </view>
+</view>

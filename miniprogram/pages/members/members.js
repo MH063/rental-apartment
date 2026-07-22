@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request')
 
 Page({
-  data: { members: [], house: null, currentRole: '' },
+  data: { members: [], house: {}, currentRole: '' },
   onShow() {
     this.load()
   },

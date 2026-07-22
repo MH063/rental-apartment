@@ -11,12 +11,12 @@
         <text class="item-amount">{{(item.final_amount / 100).toFixed(2)}} 元</text>
       </view>
       <text class="item-status">{{item.status}}</text>
-      <view class="item-actions" wx:if="{{settlement?.status === 'active'}}">
+      <view class="item-actions" wx:if="{{settlement.status === 'active'}}">
         <button bindtap="onItemConfirm" data-id="{{item.id}}" class="tag">确认</button>
         <button bindtap="onItemTransfer" data-id="{{item.id}}" class="tag">已转账</button>
         <button bindtap="onChallenge" data-id="{{item.id}}" class="tag danger">质疑</button>
       </view>
     </view>
   </view>
-  <button wx:if="{{settlement?.status === 'active'}}" class="btn-primary" bindtap="onConfirm">全部确认</button>
+  <button wx:if="{{settlement.status === 'active'}}" class="btn-primary" bindtap="onConfirm">全部确认</button>
 </view>

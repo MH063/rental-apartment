@@ -17,7 +17,7 @@
     <view class="field">
       <text class="label">分类</text>
       <picker mode="selector" range="{{categories}}" range-key="name" bindchange="onCategoryChange">
-        <view class="picker">{{categories[categoryId]?.name || '选择分类'}}</view>
+        <view class="picker">{{(categories[categoryId] || {}).name || '选择分类'}}</view>
       </picker>
     </view>
     <view class="field">

@@ -4,7 +4,7 @@
     <view class="bar-chart">
       <view wx:for="{{trend}}" wx:key="month" class="bar-item">
         <view class="bar" style="height: {{(item.total / maxTrend) * 200 || 0}}rpx; background: linear-gradient(to top, #4f46e5, #8b5cf6);"></view>
-        <text class="bar-label">{{item.month?.slice(5)}}</text>
+        <text class="bar-label">{{(item.month || '').slice(5)}}</text>
       </view>
     </view>
   </view>

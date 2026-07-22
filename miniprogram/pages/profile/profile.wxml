@@ -1,7 +1,7 @@
 <view class="container">
   <view class="user-card">
-    <image class="avatar" src="{{auth.user?.avatar || '/assets/default-avatar.png'}}" />
-    <text class="nickname">{{auth.user?.nickname || '未登录'}}</text>
+    <image class="avatar" src="{{(auth.user && auth.user.avatar) || '/assets/default-avatar.png'}}" />
+    <text class="nickname">{{(auth.user && auth.user.nickname) || '未登录'}}</text>
   </view>
 
   <view class="menu-section">

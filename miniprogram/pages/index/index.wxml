@@ -10,7 +10,7 @@
 
   <view class="summary-card" wx:if="{{summary}}">
     <text class="summary-label">本月支出</text>
-    <text class="summary-amount">{{summary?.total || '0.00'}} 元</text>
+    <text class="summary-amount">{{summary.total || '0.00'}} 元</text>
   </view>
 
   <view class="grid">

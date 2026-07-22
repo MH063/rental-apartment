@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request')
 
 Page({
-  data: { settlement: null, items: [] },
+  data: { settlement: {}, items: [] },
   onLoad(opts) {
     this.setData({ settlementId: opts.id })
     this.load()

@@ -4,6 +4,7 @@ import { auth } from "./routes/auth"
 import { houses } from "./routes/houses"
 import { bills } from "./routes/bills"
 import { settlements } from "./routes/settlements"
+import { challenges } from "./routes/challenges"
 import { stats } from "./routes/stats"
 import { categories } from "./routes/categories"
 import { templates } from "./routes/templates"
@@ -23,6 +24,7 @@ app.route("/api", auth)
 app.route("/api", houses)
 app.route("/api", bills)
 app.route("/api", settlements)
+app.route("/api", challenges)
 app.route("/api", stats)
 app.route("/api", categories)
 app.route("/api", templates)

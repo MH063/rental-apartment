@@ -174,11 +174,39 @@ houses.post("/houses/:id/leave", async (c) => {
   ).bind(houseId, userId).first<{ id: number; role: string }>()
   if (!member) return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
 
+  // Timeout open challenges involving this member
+  await c.env.DB.prepare(`
+    UPDATE settlement_challenges SET status = 'timeout', handled_at = datetime('now')
+    WHERE status = 'open' AND item_id IN (
+      SELECT si.id FROM settlement_items si
+      JOIN settlements s ON s.id = si.settlement_id
+      WHERE s.house_id = ? AND (si.payer_id = ? OR si.payee_id = ?)
+    )
+  `).bind(houseId, userId, userId).run()
+
+  // Unlock disputed items (set back to pending)
+  await c.env.DB.prepare(`
+    UPDATE settlement_items SET status = 'pending', version = version + 1, updated_at = datetime('now')
+    WHERE status = 'disputed' AND (payer_id = ? OR payee_id = ?) AND id IN (
+      SELECT item_id FROM settlement_challenges WHERE status = 'timeout'
+    )
+  `).bind(userId, userId).run()
+
   await c.env.DB.prepare(
     "UPDATE members SET status = 'left', left_at = datetime('now') WHERE id = ?"
   ).bind(member.id).run()
 
-  return c.json({ success: true, data: {} })
+  await c.env.DB.prepare(`
+    INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id)
+    VALUES (?, ?, 'member_leave', 'members', ?)
+  `).bind(houseId, userId, member.id).run()
+
+  // Check pending settlements
+  const pending = await c.env.DB.prepare(
+    "SELECT COUNT(*) as cnt FROM settlements WHERE house_id = ? AND status = 'pending'"
+  ).bind(houseId).first<{ cnt: number }>()
+
+  return c.json({ success: true, data: { pending_settlements: pending?.cnt ?? 0 } })
 })
 
 // Change member role (dorm leader only)
@@ -219,9 +247,31 @@ houses.delete("/houses/:id/members/:userId", async (c) => {
     return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
   }
 
+  // Timeout open challenges involving this member
+  await c.env.DB.prepare(`
+    UPDATE settlement_challenges SET status = 'timeout', handled_at = datetime('now')
+    WHERE status = 'open' AND item_id IN (
+      SELECT si.id FROM settlement_items si
+      JOIN settlements s ON s.id = si.settlement_id
+      WHERE s.house_id = ? AND (si.payer_id = ? OR si.payee_id = ?)
+    )
+  `).bind(houseId, targetUserId, targetUserId).run()
+
+  await c.env.DB.prepare(`
+    UPDATE settlement_items SET status = 'pending', version = version + 1, updated_at = datetime('now')
+    WHERE status = 'disputed' AND (payer_id = ? OR payee_id = ?) AND id IN (
+      SELECT item_id FROM settlement_challenges WHERE status = 'timeout'
+    )
+  `).bind(targetUserId, targetUserId).run()
+
   await c.env.DB.prepare(
     "UPDATE members SET status = 'left', left_at = datetime('now') WHERE house_id = ? AND user_id = ? AND status = 'active'"
   ).bind(houseId, targetUserId).run()
+
+  await c.env.DB.prepare(`
+    INSERT INTO operation_logs (house_id, operator_id, action, target_table, target_id)
+    VALUES (?, ?, 'member_removed', 'members', ?)
+  `).bind(houseId, currentUserId, targetUserId).run()
 
   return c.json({ success: true, data: {} })
 })

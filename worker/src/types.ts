@@ -9,4 +9,13 @@ export interface AppEnv {
   JWT_SECRET: string
 }
 
+export interface UserPayload {
+  userId: number
+  openid: string
+}
+
 export type Bindings = AppEnv
+
+export interface AuthVariables {
+  user: UserPayload
+}

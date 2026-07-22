@@ -24,8 +24,8 @@
     <text class="card-title">年度对比</text>
     <view wx:for="{{yearly}}" wx:key="month" class="year-item">
       <text class="year-month">第{{item.month}}月</text>
-      <text class="year-this">今年: {{(item.this_year / 100).toFixed(0)}} 元</text>
-      <text class="year-last">去年: {{(item.last_year / 100).toFixed(0)}} 元</text>
+      <text class="year-this">今年: {{(item.this_year / 100).toFixed(2)}} 元</text>
+      <text class="year-last">去年: {{(item.last_year / 100).toFixed(2)}} 元</text>
     </view>
   </view>
   <view wx:if="{{trend.length === 0 && category.length === 0}}" class="empty">暂无统计数据，请先录入账单</view>

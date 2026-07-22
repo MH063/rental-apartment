@@ -2,8 +2,8 @@
   <view class="toolbar">
     <input placeholder="🔍 搜索账单" bindinput="onSearch" />
   </view>
-  <scroll-view class="bill-list" bindscrolltolower="load">
-    <view wx:for="{{bills}}" wx:key="id" class="bill-card" bindtap="onBillTap" data-id="{{item.id}}">
+  <scroll-view class="bill-list" bindscrolltolower="onScrollBottom">
+    <view wx:for="{{bill.bills}}" wx:key="id" class="bill-card" bindtap="onBillTap" data-id="{{item.id}}">
       <view class="bill-left">
         <text class="bill-title">{{item.title}}</text>
         <text class="bill-date">{{item.bill_date}} · {{item.category_name || '未分类'}}</text>
@@ -13,6 +13,6 @@
         <text class="bill-status {{item.status}}">{{item.status}}</text>
       </view>
     </view>
-    <view wx:if="{{bills.length === 0}}" class="empty">暂无账单</view>
+    <view wx:if="{{bill.bills.length === 0}}" class="empty">暂无账单</view>
   </scroll-view>
 </view>

@@ -19,7 +19,8 @@
     "pages/config/config",
     "pages/ranking/ranking",
     "pages/reports/reports",
-    "pages/notification/notification"
+    "pages/notification/notification",
+    "pages/payment-methods/index/index"
   ],
   "tabBar": {
     "list": [

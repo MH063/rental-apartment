@@ -51,5 +51,20 @@ read.get("/settlements/:id", async (c) => {
     ORDER BY sc.created_at DESC
   `).bind(settlementId).all()
 
-  return c.json({ success: true, data: { ...settlement, items: items.results, challenges: challenges.results } })
+  // Derive display status from items
+  const itemStatuses = items.results.map(i => i.status)
+  let displayStatus: string
+  if (itemStatuses.every(s => s === 'transferred')) displayStatus = '已完成'
+  else if (itemStatuses.some(s => s === 'disputed')) displayStatus = '争议中'
+  else if (itemStatuses.every(s => s === 'confirmed')) displayStatus = '已确认'
+  else if (itemStatuses.every(s => s === 'pending')) displayStatus = '待确认'
+  else displayStatus = '进行中'
+
+  // Add paid info to each item
+  const enrichedItems = items.results.map(item => ({
+    ...item,
+    remaining: Number(item.final_amount) - (Number(item.paid_amount) || 0),
+  }))
+
+  return c.json({ success: true, data: { ...settlement, display_status: displayStatus, items: enrichedItems, challenges: challenges.results } })
 })

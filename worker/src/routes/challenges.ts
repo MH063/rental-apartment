@@ -133,6 +133,7 @@ async function recalculateSettlement(db: D1Database, itemId: number) {
     if (challengedItemIds.has(ex.id)) continue
     const key = `${ex.payer_id}-${ex.payee_id}`
     if (!usedKeys.has(key)) {
+      await db.prepare("DELETE FROM partial_payments WHERE item_id = ?").bind(ex.id).run()
       await db.prepare("DELETE FROM settlement_items WHERE id = ?").bind(ex.id).run()
     }
   }
@@ -215,11 +216,11 @@ challenges.post("/settlements/:settlementId/items/:itemId/challenges", async (c)
   if (!reason) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
 
   const item = await c.env.DB.prepare(`
-    SELECT si.*, s.house_id FROM settlement_items si
+    SELECT si.*, s.house_id, s.status AS settlement_status FROM settlement_items si
     JOIN settlements s ON s.id = si.settlement_id
     WHERE si.id = ?
-  `).bind(itemId).first<{ id: number; house_id: number; final_amount: number; status: string }>()
-  if (!item) return c.json({ success: false, error: "ERR_SETTLE_NOT_FOUND" }, 404)
+  `).bind(itemId).first<{ id: number; house_id: number; final_amount: number; status: string; version: number; settlement_status: string }>()
+  if (!item || item.settlement_status !== 'active') return c.json({ success: false, error: "ERR_SETTLE_NOT_FOUND" }, 404)
 
   const member = await c.env.DB.prepare(
     "SELECT id FROM members WHERE house_id = ? AND user_id = ? AND status = 'active'"
@@ -248,10 +249,13 @@ challenges.post("/settlements/:settlementId/items/:itemId/challenges", async (c)
   ).run()
   const challengeId = Number(result.meta.last_row_id)
 
-  // Mark item as disputed
-  await c.env.DB.prepare(
-    "UPDATE settlement_items SET status = 'disputed', version = version + 1, updated_at = datetime('now') WHERE id = ?"
-  ).bind(itemId).run()
+  // Mark item as disputed (with version check)
+  const disputeResult = await c.env.DB.prepare(
+    "UPDATE settlement_items SET status = 'disputed', version = version + 1, updated_at = datetime('now') WHERE id = ? AND version = ?"
+  ).bind(itemId, item.version).run()
+  if ((disputeResult.meta.changes ?? 0) === 0) {
+    return c.json({ success: false, error: "ERR_COMMON_CONFLICT" }, 409)
+  }
 
   // Log
   await c.env.DB.prepare(`
@@ -292,6 +296,11 @@ challenges.post("/challenges/:id/respond", async (c) => {
   if (action === "adjust" && adjusted_amount != null) {
     const snap = await captureBefore(c.env.DB, challenge.item_id, challengeId)
 
+    // Get current item version for optimistic lock
+    const itemForLock = await c.env.DB.prepare("SELECT version FROM settlement_items WHERE id = ?")
+      .bind(challenge.item_id).first<{ version: number }>()
+    if (!itemForLock) return c.json({ success: false, error: "ERR_SETTLE_NOT_FOUND" }, 404)
+
     try {
       await c.env.DB.prepare(`
         UPDATE settlement_challenges SET status = 'resolved',
@@ -299,9 +308,12 @@ challenges.post("/challenges/:id/respond", async (c) => {
         WHERE id = ?
       `).bind(adjusted_amount, userId, challengeId).run()
 
-      await c.env.DB.prepare(
-        "UPDATE settlement_items SET final_amount = ?, status = 'confirmed', version = version + 1, updated_at = datetime('now') WHERE id = ?"
-      ).bind(adjusted_amount, challenge.item_id).run()
+      const itemResult = await c.env.DB.prepare(
+        "UPDATE settlement_items SET final_amount = ?, status = 'confirmed', version = version + 1, updated_at = datetime('now') WHERE id = ? AND version = ?"
+      ).bind(adjusted_amount, challenge.item_id, itemForLock.version).run()
+      if ((itemResult.meta.changes ?? 0) === 0) {
+        return c.json({ success: false, error: "ERR_COMMON_CONFLICT" }, 409)
+      }
 
       await syncBillsFromChallenge(c.env.DB, challenge.item_id, adjusted_amount, challenge.house_id)
       await recalculateSettlement(c.env.DB, challenge.item_id)
@@ -311,7 +323,7 @@ challenges.post("/challenges/:id/respond", async (c) => {
         VALUES (?, ?, 'challenge_adjusted', 'settlement_items', ?, ?)
       `).bind(challenge.house_id, userId, challenge.item_id,
         JSON.stringify({ final_amount: adjusted_amount })).run()
-    } catch (err) {
+    } catch {
       await compensateSaga(c.env.DB, snap, challenge.item_id, challengeId)()
       return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 500)
     }
@@ -409,6 +421,10 @@ challenges.post("/challenges/:id/ruling", async (c) => {
 
   const snap = await captureBefore(c.env.DB, challenge.item_id, challengeId)
 
+  const itemForLock = await c.env.DB.prepare("SELECT version FROM settlement_items WHERE id = ?")
+    .bind(challenge.item_id).first<{ version: number }>()
+  if (!itemForLock) return c.json({ success: false, error: "ERR_SETTLE_NOT_FOUND" }, 404)
+
   try {
     await c.env.DB.prepare(`
       UPDATE settlement_challenges SET status = 'resolved',
@@ -416,11 +432,14 @@ challenges.post("/challenges/:id/ruling", async (c) => {
       WHERE id = ?
     `).bind(finalAmount, userId, challengeId).run()
 
-    await c.env.DB.prepare(`
+    const itemResult = await c.env.DB.prepare(`
       UPDATE settlement_items SET final_amount = ?, status = 'confirmed',
         version = version + 1, updated_at = datetime('now')
-      WHERE id = ?
-    `).bind(finalAmount, challenge.item_id).run()
+      WHERE id = ? AND version = ?
+    `).bind(finalAmount, challenge.item_id, itemForLock.version).run()
+    if ((itemResult.meta.changes ?? 0) === 0) {
+      return c.json({ success: false, error: "ERR_COMMON_CONFLICT" }, 409)
+    }
 
     await syncBillsFromChallenge(c.env.DB, challenge.item_id, finalAmount, challenge.house_id)
     await recalculateSettlement(c.env.DB, challenge.item_id)
@@ -432,7 +451,7 @@ challenges.post("/challenges/:id/ruling", async (c) => {
       JSON.stringify({ ruling, final_amount: finalAmount })).run()
 
     return c.json({ success: true, data: {} })
-  } catch (err) {
+  } catch {
     await compensateSaga(c.env.DB, snap, challenge.item_id, challengeId)()
     return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 500)
   }

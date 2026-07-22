@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { splitEqual, splitByWeight, splitByDays, splitByUsage, splitByArea, splitByTier } from "../src/algorithms/split"
+import { splitEqual, splitByWeight, splitByTier } from "../src/algorithms/split"
 
 describe("splitEqual", () => {
   it("divides amount equally with remainder", () => {

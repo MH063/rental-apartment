@@ -7,6 +7,7 @@
     "dev": "wrangler dev --ip 0.0.0.0 --port 8787",
     "deploy": "wrangler deploy",
     "test": "vitest",
+    "lint": "eslint src/ tests/ --ext .ts",
     "typecheck": "tsc --noEmit",
     "migrate:local": "wrangler d1 migrations apply rental-db --local",
     "migrate:remote": "wrangler d1 migrations apply rental-db --remote"
@@ -16,6 +17,10 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "eslint": "^10.7.0",
+    "sql.js": "^1.14.1",
     "typescript": "^5",
     "vitest": "^3",
     "wrangler": "^4"

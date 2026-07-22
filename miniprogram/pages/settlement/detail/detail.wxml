@@ -7,8 +7,8 @@
   <view class="items">
     <view wx:for="{{items}}" wx:key="id" class="item-card">
       <view class="item-header">
-        <text class="from">{{item.from_name}} → {{item.to_name}}</text>
-        <text class="item-amount">{{(item.amount / 100).toFixed(2)}} 元</text>
+        <text class="from">{{item.payer_name}} → {{item.payee_name}}</text>
+        <text class="item-amount">{{(item.final_amount / 100).toFixed(2)}} 元</text>
       </view>
       <text class="item-status">{{item.status}}</text>
       <view class="item-actions" wx:if="{{settlement?.status === 'pending'}}">

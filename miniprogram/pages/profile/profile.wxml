@@ -1,19 +1,19 @@
 <view class="container">
   <view class="user-card">
-    <image class="avatar" src="{{user?.avatar || '/assets/default-avatar.png'}}" />
-    <text class="nickname">{{user?.nickname || '未登录'}}</text>
+    <image class="avatar" src="{{auth.user?.avatar || '/assets/default-avatar.png'}}" />
+    <text class="nickname">{{auth.user?.nickname || '未登录'}}</text>
   </view>
 
   <view class="menu-section">
     <text class="section-title">当前房屋</text>
-    <view wx:for="{{houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
+    <view wx:for="{{house.houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
       <text>{{item.name}}</text>
-      <text class="check" wx:if="{{item.id === currentHouseId}}">✓</text>
+      <text class="check" wx:if="{{item.id === house.currentHouseId}}">✓</text>
     </view>
   </view>
 
   <view class="menu-section">
-    <navigator url="/pages/payment-methods/index" class="menu-item">
+    <navigator url="/pages/payment-methods/index/index" class="menu-item">
       <text>支付方式</text>
       <text class="arrow">›</text>
     </navigator>

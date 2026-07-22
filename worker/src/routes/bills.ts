@@ -151,6 +151,27 @@ bills.get("/bills", async (c) => {
   return c.json({ success: true, data: { items, next_cursor: nextCursor } })
 })
 
+// List bills where current user has a split
+bills.get("/bills/my", async (c) => {
+  const { userId } = c.var.user
+  const houseId = c.req.query("house_id")
+  if (!houseId) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
+
+  const member = await c.env.DB.prepare(
+    "SELECT id FROM members WHERE house_id = ? AND user_id = ? AND status = 'active'"
+  ).bind(Number(houseId), userId).first()
+  if (!member) return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
+
+  const bills = await c.env.DB.prepare(`
+    SELECT DISTINCT b.* FROM bills b
+    JOIN splits s ON s.bill_id = b.id
+    WHERE b.house_id = ? AND s.user_id = ?
+    ORDER BY b.created_at DESC
+  `).bind(Number(houseId), userId).all()
+
+  return c.json({ success: true, data: bills.results })
+})
+
 // Get bill detail with splits
 bills.get("/bills/:id", async (c) => {
   const { userId } = c.var.user
@@ -271,7 +292,7 @@ bills.post("/bills/:id/confirm", async (c) => {
   const billId = Number(c.req.param("id"))
 
   const bill = await c.env.DB.prepare(
-    "SELECT id, house_id, creator_id, status FROM bills WHERE id = ?"
+    "SELECT id, house_id, creator_id, status, version FROM bills WHERE id = ?"
   ).bind(billId).first<{ id: number; house_id: number; creator_id: number; status: string; version: number }>()
   if (!bill) return c.json({ success: false, error: "ERR_BILL_NOT_FOUND" }, 404)
   if (bill.creator_id !== userId) return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)

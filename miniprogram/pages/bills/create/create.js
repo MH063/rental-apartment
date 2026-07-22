@@ -40,24 +40,14 @@ Page({
     const houseId = getApp().globalData.currentHouseId
     const total = Math.round(Number(totalAmount) * 100)
 
-    // Build splits from members
+    // Build splits — send parameters, not pre-computed amounts (server computes)
     const splits = members.map(m => {
-      let amount = 0
-      const cnt = members.length
-      const totalWeight = members.reduce((s, mm) => s + (mm.weight || 1), 0)
-      const totalDays = members.reduce((s, mm) => s + (mm.days || 30), 0)
-      const totalUsage = members.reduce((s, mm) => s + (mm.usage || 0), 0)
-      const totalArea = members.reduce((s, mm) => s + (mm.area || 1), 0)
-
-      switch (splitType) {
-        case '均摊': amount = Math.round(total / cnt); break
-        case '权重': amount = Math.round(total * (m.weight || 1) / totalWeight); break
-        case '天数': amount = Math.round(total * (m.days || 30) / totalDays); break
-        case '用量': amount = Math.round(total * (m.usage || 0) / totalUsage); break
-        case '面积': amount = Math.round(total * (m.area || 1) / totalArea); break
-        case '阶梯': amount = Math.round(total / cnt); break
-      }
-      return { user_id: m.user_id, amount }
+      let parameter = 1
+      if (splitType === '权重') parameter = m.weight || 1
+      else if (splitType === '天数') parameter = m.days || 30
+      else if (splitType === '用量') parameter = m.usage || 0
+      else if (splitType === '面积') parameter = m.area || 1
+      return { user_id: m.user_id, parameter }
     })
 
     await request({

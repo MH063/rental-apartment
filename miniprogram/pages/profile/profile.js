@@ -1,21 +1,18 @@
-const { request, logout } = require('../../utils/request')
+const { authStore, loadProfile, logout } = require('../../store/index')
+const { houseStore, loadHouses, switchHouse } = require('../../store/index')
 
 Page({
-  data: { user: null, houses: [], currentHouseId: null },
+  data: {},
   onShow() {
+    authStore.connect(this, 'auth')
+    houseStore.connect(this, 'house')
     this.load()
   },
   async load() {
-    const app = getApp()
-    const user = app.globalData.userInfo
-    const houses = await request({ url: '/api/houses' })
-    this.setData({ user, houses, currentHouseId: app.globalData.currentHouseId })
+    await Promise.all([loadProfile(), loadHouses()])
   },
   onSwitchHouse(e) {
-    const id = e.currentTarget.dataset.id
-    getApp().globalData.currentHouseId = id
-    this.setData({ currentHouseId: id })
-    wx.showToast({ title: '已切换' })
+    switchHouse(e.currentTarget.dataset.id)
   },
   onLogout() {
     wx.showModal({
@@ -26,7 +23,7 @@ Page({
           logout()
           wx.redirectTo({ url: '/pages/login/login' })
         }
-      }
+      },
     })
   },
 })

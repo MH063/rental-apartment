@@ -1,7 +1,8 @@
 <view class="container">
+  <wxs src="../../../utils/format.wxs" module="fmt" />
   <view wx:for="{{bills}}" wx:key="id" class="bill-card">
     <text class="title">{{item.title}}</text>
-    <text class="amount">{{(item.total_amount / 100).toFixed(2)}} 元</text>
+    <text class="amount">{{fmt.money(item.total_amount)}} 元</text>
     <text class="status {{item.status}}">{{item.status}}</text>
   </view>
   <view wx:if="{{bills.length === 0}}" class="empty">暂无账单</view>

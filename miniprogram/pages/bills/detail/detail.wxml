@@ -1,7 +1,8 @@
 <view class="container">
+  <wxs src="../../../utils/format.wxs" module="fmt" />
   <view class="card" wx:if="{{bill}}">
     <text class="bill-title">{{bill.title}}</text>
-    <text class="bill-amount">{{(bill.total_amount / 100).toFixed(2)}} 元</text>
+    <text class="bill-amount">{{fmt.money(bill.total_amount)}} 元</text>
     <view class="meta">
       <text>分类：{{bill.category_name || '未分类'}}</text>
       <text>日期：{{bill.bill_date}}</text>

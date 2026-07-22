@@ -37,12 +37,12 @@ Page({
   },
   async onSubmit() {
     const { title, totalAmount, categoryId, splitType, billDate, members } = this.data
-    if (!title || !totalAmount) return wx.showToast({ title: '请填写完整信�?, icon: 'none' })
+    if (!title || !totalAmount) return wx.showToast({ title: '请填写完整信息', icon: 'none' })
 
     const houseId = getApp().globalData.currentHouseId
     const total = Math.round(Number(totalAmount) * 100)
 
-    // Build splits �?send parameters, not pre-computed amounts (server computes)
+    // Build splits — send parameters, not pre-computed amounts (server computes)
     const splits = members.map(m => {
       let parameter = 1
       if (splitType === '权重') parameter = m.weight || 1

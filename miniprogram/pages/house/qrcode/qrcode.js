@@ -26,7 +26,7 @@ Page({
           const houseId = getApp().globalData.currentHouseId
           const data = await request({ url: `/api/houses/${houseId}/invite-code`, method: 'POST' })
           this.setData({ inviteCode: data.invite_code, qrData: `invite:${data.invite_code}` })
-          wx.showToast({ title: '已重新生�? })
+          wx.showToast({ title: '已重新生成' })
         }
       }
     })

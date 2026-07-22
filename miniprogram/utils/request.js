@@ -11,10 +11,16 @@ function request({ url, method = 'GET', data, loading = true }) {
   const token = wx.getStorageSync(TOKEN_KEY)
 
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      wx.hideLoading()
+      wx.showToast({ title: '请求超时，请重试', icon: 'none' })
+      reject(new Error('timeout'))
+    }, 15000)
     wx.request({
       url: API_BASE + url,
       method,
       data,
+      timeout: 15000,
       header: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: 'Bearer ' + token } : {}),
@@ -41,6 +47,7 @@ function request({ url, method = 'GET', data, loading = true }) {
         reject(err)
       },
       complete() {
+        clearTimeout(timer)
         if (loading) wx.hideLoading()
       },
     })

@@ -9,6 +9,7 @@ Page({
     editAvatar: '',
     editAvatarLocal: '',
     uploading: false,
+    loadError: false,
   },
 
   onShow() {
@@ -18,10 +19,70 @@ Page({
   },
 
   async load() {
+    this.setData({ loadError: false })
     try {
       await Promise.all([loadProfile(), loadHouses()])
     } catch (e) {
       console.error('[profile] 加载失败:', e)
+      this.setData({ loadError: true })
+    }
+  },
+
+  onRetry() {
+    this.load()
+  },
+
+  // ---- 房屋操作 ----
+  onHouseAction(e) {
+    var id = e.currentTarget.dataset.id
+    var name = e.currentTarget.dataset.name
+    var isCurrent = id === this.data.house.currentHouseId
+    var items = isCurrent ? ['查看详情'] : ['切换到此房屋', '查看详情', '退出房屋']
+    var that = this
+    wx.showActionSheet({
+      itemList: items,
+      success(res) {
+        var tap = res.tapIndex
+        if (isCurrent) {
+          if (tap === 0) that.onViewHouseDetail(id)
+        } else {
+          if (tap === 0) that._doSwitch(id)
+          else if (tap === 1) that.onViewHouseDetail(id)
+          else if (tap === 2) that.onLeaveHouse(id, name)
+        }
+      },
+    })
+  },
+
+  _doSwitch(id) {
+    if (id === this.data.house.currentHouseId) return
+    switchHouse(id)
+    wx.showToast({ title: '已切换房屋', icon: 'success' })
+  },
+
+  onViewHouseDetail(id) {
+    wx.navigateTo({ url: '/pages/config/config' })
+  },
+
+  onLeaveHouse(id, name) {
+    wx.showModal({
+      title: '退出房屋',
+      content: '确定退出「' + name + '」？退出后可重新扫码加入。',
+      confirmColor: '#ef4444',
+      success(res) {
+        if (res.confirm) getCurrentPages().pop()._doLeave(id)
+      },
+    })
+  },
+
+  async _doLeave(id) {
+    try {
+      await request({ url: '/api/houses/' + id + '/leave', method: 'POST' })
+      wx.showToast({ title: '已退出房屋', icon: 'success' })
+      this.setData({ loadError: false })
+      loadHouses()
+    } catch {
+      wx.showToast({ title: '退出失败', icon: 'none' })
     }
   },
 
@@ -32,6 +93,7 @@ Page({
     wx.showToast({ title: '已切换房屋', icon: 'success' })
   },
 
+  // ---- 退出登录 ----
   onLogout() {
     wx.showModal({
       title: '退出登录',
@@ -46,6 +108,7 @@ Page({
     })
   },
 
+  // ---- 编辑资料 ----
   onOpenEdit() {
     var user = this.data.auth.user || {}
     this.setData({

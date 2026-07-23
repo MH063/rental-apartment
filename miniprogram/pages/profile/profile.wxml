@@ -9,15 +9,24 @@
     <text class="edit-hint">编辑 ›</text>
   </view>
 
+  <!-- 加载失败 -->
+  <view wx:if="{{loadError}}" class="error-wrap">
+    <text class="error-text">加载失败，</text>
+    <text class="error-retry" bindtap="onRetry">点击重试</text>
+  </view>
+
   <!-- 当前房屋 -->
   <view class="card-section" wx:if="{{house.houses && house.houses.length > 0}}">
     <text class="section-title">当前房屋</text>
-    <view wx:for="{{house.houses}}" wx:key="id" class="house-item {{item.id === house.currentHouseId ? 'active' : ''}}" bindtap="onSwitchHouse" data-id="{{item.id}}" hover-class="item-hover">
-      <view class="house-info">
+    <view wx:for="{{house.houses}}" wx:key="id" class="house-item {{item.id === house.currentHouseId ? 'active' : ''}}" hover-class="item-hover">
+      <view class="house-info" bindtap="onSwitchHouse" data-id="{{item.id}}">
         <text class="house-name">{{item.name}}</text>
         <text class="house-address" wx:if="{{item.address}}">{{item.address}}</text>
       </view>
-      <view class="house-badge" wx:if="{{item.id === house.currentHouseId}}">当前</view>
+      <view class="house-right">
+        <view class="house-badge" wx:if="{{item.id === house.currentHouseId}}">当前</view>
+        <text class="house-more" bindtap="onHouseAction" data-id="{{item.id}}" data-name="{{item.name}}">···</text>
+      </view>
     </view>
   </view>
 
@@ -54,13 +63,34 @@
     </navigator>
   </view>
 
-  <!-- 账单与通知 -->
+  <!-- 账单、结算与统计 -->
   <view class="card-section">
-    <text class="section-title">账单与通知</text>
+    <text class="section-title">账单、结算与统计</text>
     <navigator url="/pages/bills/my/my" class="menu-item" hover-class="menu-hover">
       <view class="menu-left">
         <view class="menu-icon icon-bill">📋</view>
         <text class="menu-text">我的账单</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/settlement/history/history" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-settlement">📊</view>
+        <text class="menu-text">结算记录</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/stats/stats" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-stats">📈</view>
+        <text class="menu-text">数据统计</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/ranking/ranking" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-ranking">🏆</view>
+        <text class="menu-text">成员排行</text>
       </view>
       <text class="arrow">›</text>
     </navigator>
@@ -116,7 +146,6 @@
     </view>
 
     <view class="modal-body">
-      <!-- 头像 -->
       <view class="field avatar-field">
         <text class="field-label">头像</text>
         <view class="avatar-upload" bindtap="onPickAvatar">
@@ -128,7 +157,6 @@
         </view>
       </view>
 
-      <!-- 昵称 -->
       <view class="field">
         <text class="field-label">昵称</text>
         <input class="field-input" placeholder="请输入昵称" value="{{editNickname}}" bindinput="onNicknameInput" maxlength="20" />

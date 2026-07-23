@@ -1,16 +1,58 @@
-<view class="container">
-  <view class="header-bar">
-    <text class="title">通知中心</text>
-    <button class="read-btn" bindtap="onRead" disabled="{{loading || notifications.length === 0}}">
-      {{loading ? '处理中...' : '全部已读'}}
+<wxs module="helper">
+module.exports = {
+  shortTime: function(t) {
+    if (!t) return ''
+    var parts = t.split('T')
+    if (parts.length < 2) return t.slice(0, 10)
+    return parts[0].slice(5) + ' ' + parts[1].slice(0, 5)
+  },
+  iconOf: function(title) {
+    if (title.indexOf('结算') !== -1) return '💰'
+    if (title.indexOf('账单') !== -1) return '📄'
+    return '🔔'
+  }
+}
+</wxs>
+
+<view class="page">
+  <view class="header">
+    <view class="header-left">
+      <text class="header-title">通知中心</text>
+      <text class="header-badge" wx:if="{{unreadCount > 0}}">{{unreadCount}}</text>
+    </view>
+    <button class="btn-read" bindtap="onReadAll" disabled="{{loading || notifications.length === 0}}">
+      <text wx:if="{{loading}}">处理中</text>
+      <text wx:else>全部已读</text>
     </button>
   </view>
-  <view wx:for="{{notifications}}" wx:key="id" class="notif-card {{!item.is_read ? 'unread' : ''}}">
-    <view class="notif-dot" wx:if="{{!item.is_read}}"></view>
-    <view class="notif-body">
-      <text class="notif-text">{{item.content || item.message}}</text>
-      <text class="notif-time">{{item.created_at || item.time}}</text>
+
+  <view wx:if="{{!loaded && loading}}" class="loading-wrap">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{loaded && notifications.length === 0}}" class="empty-wrap">
+    <text class="empty-icon">🔔</text>
+    <text class="empty-title">暂无通知</text>
+    <text class="empty-desc">当有新的账单或结算时，会在这里通知你</text>
+  </view>
+
+  <view wx:else class="list">
+    <view
+      wx:for="{{notifications}}" wx:key="id"
+      class="notif-card {{!item.read ? 'unread' : ''}}"
+      bindtap="onTap"
+      data-item="{{item}}"
+      data-index="{{index}}"
+    >
+      <view class="notif-icon-wrap">
+        <text class="notif-icon">{{helper.iconOf(item.title)}}</text>
+      </view>
+      <view class="notif-body">
+        <text class="notif-title">{{item.title}}</text>
+        <text class="notif-content">{{item.content}}</text>
+        <text class="notif-time">{{helper.shortTime(item.created_at)}}</text>
+      </view>
+      <view class="notif-dot" wx:if="{{!item.read}}"></view>
     </view>
   </view>
-  <view wx:if="{{notifications.length === 0}}" class="empty">暂无通知</view>
 </view>

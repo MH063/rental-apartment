@@ -9,18 +9,53 @@ export const houses = new Hono<{ Bindings: AppEnv; Variables: AuthVariables }>()
 // Apply auth to all routes
 houses.use("*", authMiddleware)
 
+interface HouseFields {
+  name: string; address?: string
+  unit_type?: string; area?: number; floor?: string
+  monthly_rent?: number; deposit?: number
+  lease_start?: string; lease_end?: string
+  landlord?: string; utility_accounts?: string
+  property_fee?: number; photo?: string; notes?: string
+}
+
+const HOUSE_COLUMNS = `
+  name, address, unit_type, area, floor,
+  monthly_rent, deposit, lease_start, lease_end,
+  landlord, utility_accounts, property_fee, photo, notes,
+  invite_code, invite_code_expires_at, creator_id
+`.replace(/\s+/g, ' ').trim()
+
+const HOUSE_PLACEHOLDERS = [
+  '?', '?', '?', '?', '?',
+  '?', '?', '?', '?',
+  '?', '?', '?', '?', '?',
+  '?', '?', '?',
+].join(', ')
+
+function houseValues(body: HouseFields, userId: number, inviteCode: string, expiresAt: string): unknown[] {
+  return [
+    body.name, body.address || '',
+    body.unit_type || '', body.area ?? null, body.floor || '',
+    body.monthly_rent ?? null, body.deposit ?? null,
+    body.lease_start || null, body.lease_end || null,
+    body.landlord || '', body.utility_accounts || '',
+    body.property_fee ?? null, body.photo || '', body.notes || '',
+    inviteCode, expiresAt, userId,
+  ]
+}
+
 // Create house
 houses.post("/houses", async (c) => {
   const { userId } = c.var.user
-  const { name, address } = await c.req.json<{ name: string; address?: string }>()
-  if (!name) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
+  const body = await c.req.json<HouseFields>()
+  if (!body.name) return c.json({ success: false, error: "ERR_COMMON_INTERNAL" }, 400)
 
   const inviteCode = generateInviteCode()
   const expiresAt = inviteCodeExpiresAt()
 
   const result = await c.env.DB.prepare(
-    "INSERT INTO houses (name, address, invite_code, invite_code_expires_at, creator_id) VALUES (?, ?, ?, ?, ?)"
-  ).bind(name, address || "", inviteCode, expiresAt, userId).run()
+    `INSERT INTO houses (${HOUSE_COLUMNS}) VALUES (${HOUSE_PLACEHOLDERS})`
+  ).bind(...houseValues(body, userId, inviteCode, expiresAt)).run()
 
   const houseId = Number(result.meta.last_row_id)
 
@@ -79,7 +114,7 @@ houses.get("/houses/:id", async (c) => {
 houses.put("/houses/:id", async (c) => {
   const { userId } = c.var.user
   const houseId = Number(c.req.param("id"))
-  const { name, address } = await c.req.json<{ name?: string; address?: string }>()
+  const body = await c.req.json<Partial<HouseFields>>()
 
   const member = await c.env.DB.prepare(
     "SELECT role FROM members WHERE house_id = ? AND user_id = ? AND status = 'active'"
@@ -88,9 +123,18 @@ houses.put("/houses/:id", async (c) => {
     return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
   }
 
+  const updates: string[] = ['updated_at = datetime(\'now\')']
+  const params: unknown[] = []
+  for (const col of ['name', 'address', 'unit_type', 'area', 'floor', 'monthly_rent', 'deposit', 'lease_start', 'lease_end', 'landlord', 'utility_accounts', 'property_fee', 'photo', 'notes'] as const) {
+    if (body[col] !== undefined) {
+      updates.push(`${col} = ?`)
+      params.push(body[col] ?? null)
+    }
+  }
+  params.push(houseId)
   await c.env.DB.prepare(
-    "UPDATE houses SET name = COALESCE(?, name), address = COALESCE(?, address), updated_at = datetime('now') WHERE id = ?"
-  ).bind(name || null, address || null, houseId).run()
+    `UPDATE houses SET ${updates.join(', ')} WHERE id = ?`
+  ).bind(...params).run()
 
   const house = await c.env.DB.prepare("SELECT * FROM houses WHERE id = ?").bind(houseId).first()
   return c.json({ success: true, data: house })

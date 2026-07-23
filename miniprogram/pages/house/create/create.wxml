@@ -1,32 +1,117 @@
-<view class="container">
+<view class="page">
   <view class="hero">
     <text class="hero-icon">🏠</text>
     <text class="hero-title">创建你的合租空间</text>
-    <text class="hero-desc">创建后自动生成邀请码，即可邀请室友加入</text>
+    <text class="hero-desc">完整填写房屋信息，方便室友了解</text>
   </view>
 
   <view class="card">
-    <view class="field {{nameError ? 'field-error' : ''}}">
-      <view class="label-row">
+
+    <!-- 基本信息 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">📋</text>
+        <text class="section-title">基本信息</text>
+      </view>
+
+      <view class="field">
         <text class="label">房屋名称 <text class="required">*</text></text>
+        <input class="input" placeholder="例：幸福小区3栋503" value="{{name}}" bindinput="onNameInput" maxlength="50" />
         <text class="counter">{{name.length}}/50</text>
       </view>
-      <input class="input" placeholder="例：幸福小区3栋503" value="{{name}}" bindinput="onNameInput" maxlength="50" />
-      <text class="error" wx:if="{{nameError}}">{{nameError}}</text>
-    </view>
 
-    <view class="field {{addressError ? 'field-error' : ''}}">
-      <view class="label-row">
+      <view class="field">
         <text class="label">地址</text>
+        <input class="input" placeholder="小区名称或详细地址（选填）" value="{{address}}" bindinput="onAddressInput" maxlength="100" />
         <text class="counter">{{address.length}}/100</text>
       </view>
-      <input class="input" placeholder="小区名称或详细地址（选填）" value="{{address}}" bindinput="onAddressInput" maxlength="100" />
-      <text class="error" wx:if="{{addressError}}">{{addressError}}</text>
+
+      <view class="field">
+        <text class="label">户型</text>
+        <picker class="picker" range="{{unitTypes}}" value="{{unitTypeIndex}}" bindchange="onUnitTypeChange">
+          <view class="picker-value">{{unitTypes[unitTypeIndex]}}</view>
+        </picker>
+        <input wx:if="{{showCustomUnitType}}" class="input" placeholder="请输入户型" value="{{unitTypeCustom}}" bindinput="onUnitTypeCustomInput" maxlength="20" />
+      </view>
+
+      <view class="field-row">
+        <view class="field half">
+          <text class="label">面积（㎡）</text>
+          <input class="input" placeholder="0" type="digit" value="{{areaDisplay}}" bindinput="onAreaInput" />
+        </view>
+        <view class="field half">
+          <text class="label">楼层</text>
+          <input class="input" placeholder="如：12/33层" value="{{floor}}" bindinput="onFloorInput" maxlength="20" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 租约信息 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">📄</text>
+        <text class="section-title">租约信息</text>
+      </view>
+
+      <view class="field-row three">
+        <view class="field third">
+          <text class="label">月租金（元）</text>
+          <input class="input" placeholder="0" type="digit" value="{{monthlyRentDisplay}}" bindinput="onRentInput" />
+        </view>
+        <view class="field third">
+          <text class="label">押金（元）</text>
+          <input class="input" placeholder="0" type="digit" value="{{depositDisplay}}" bindinput="onDepositInput" />
+        </view>
+        <view class="field third">
+          <text class="label">物业费（元/月）</text>
+          <input class="input" placeholder="0" type="digit" value="{{propertyFeeDisplay}}" bindinput="onPropertyFeeInput" />
+        </view>
+      </view>
+
+      <view class="field-row">
+        <view class="field half">
+          <text class="label">起租日期</text>
+          <picker class="picker" mode="date" value="{{leaseStart}}" bindchange="onLeaseStartChange">
+            <view class="picker-value {{leaseStart ? '' : 'placeholder'}}">{{leaseStart || '请选择起租日期'}}</view>
+          </picker>
+        </view>
+        <view class="field half">
+          <text class="label">合同到期日</text>
+          <picker class="picker" mode="date" value="{{leaseEnd}}" bindchange="onLeaseEndChange">
+            <view class="picker-value {{leaseEnd ? '' : 'placeholder'}}">{{leaseEnd || '请选择到期日期'}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他信息 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">📎</text>
+        <text class="section-title">其他信息</text>
+      </view>
+
+      <view class="field">
+        <text class="label">房东姓名/电话</text>
+        <input class="input" placeholder="选填" value="{{landlord}}" bindinput="onLandlordInput" maxlength="50" />
+      </view>
+
+      <view class="field">
+        <text class="label">水电气户号</text>
+        <input class="input" placeholder="水:xxxxxxxx 电:xxxxxxxx" value="{{utilityAccounts}}" bindinput="onUtilityInput" maxlength="100" />
+      </view>
+
+      <view class="field">
+        <text class="label">备注</text>
+        <textarea class="textarea" placeholder="其他需要记录的信息" value="{{notes}}" bindinput="onNotesInput" maxlength="500" />
+        <text class="counter">{{notes.length}}/500</text>
+      </view>
     </view>
 
     <button class="btn-primary {{!canSubmit() ? 'btn-disabled' : ''}}" disabled="{{!canSubmit()}}" bindtap="onSubmit">
       <text wx:if="{{submitting}}">创建中...</text>
       <text wx:else>创建房屋</text>
     </button>
+
   </view>
 </view>

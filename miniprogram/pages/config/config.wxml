@@ -1,16 +1,60 @@
-<view class="container">
-  <view class="section">
-    <text class="section-title">当前房屋</text>
-    <view wx:for="{{houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}" hover-class="item-hover">
-      <text class="house-name">{{item.name}}</text>
-      <text class="check" wx:if="{{item.id === currentHouseId}}">✓</text>
-    </view>
+<view class="page">
+  <view class="header">
+    <text class="header-title">设置</text>
   </view>
-  <view class="section">
-    <text class="section-title">预算设置</text>
-    <view wx:for="{{categories}}" wx:key="id" class="budget-item">
-      <text class="cat-name">{{item.name}}</text>
-      <input class="budget-input" placeholder="月预算(元)" type="digit" value="{{budgetMap[item.id] || ''}}" bindinput="onBudgetInput" bindblur="onSetBudget" data-cat-id="{{item.id}}" />
-    </view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <text class="loading-text">加载中...</text>
   </view>
+
+  <block wx:else>
+
+    <!-- 房屋切换 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-icon">🏠</text>
+        <text class="card-title">当前房屋</text>
+      </view>
+      <view class="card-body">
+        <view wx:for="{{houses}}" wx:key="id" class="list-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
+          <view class="list-item-left">
+            <text class="list-item-name">{{item.name}}</text>
+            <text class="list-item-addr" wx:if="{{item.address}}">{{item.address}}</text>
+          </view>
+          <view class="list-item-right">
+            <text class="check-mark" wx:if="{{item.id === currentHouseId}}">✓</text>
+            <text class="check-label" wx:if="{{item.id === currentHouseId}}">当前</text>
+          </view>
+        </view>
+        <view wx:if="{{houses.length === 0}}" class="empty-row">
+          <text class="empty-text">暂无房屋，请先创建或加入</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预算设置 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-icon">💰</text>
+        <text class="card-title">月预算设置</text>
+        <text class="card-hint">元/月</text>
+      </view>
+      <view class="card-body">
+        <view wx:if="{{!currentHouseId}}" class="empty-row">
+          <text class="empty-text">请先选择房屋</text>
+        </view>
+        <view wx:elif="{{categories.length === 0}}" class="empty-row">
+          <text class="empty-text">暂未设置分类</text>
+        </view>
+        <view wx:for="{{categories}}" wx:key="id" class="budget-row">
+          <text class="cat-name">{{item.name}}</text>
+          <view class="budget-input-wrap">
+            <text class="budget-prefix">¥</text>
+            <input class="budget-input" placeholder="0" type="digit" value="{{budgetMap[item.id] || ''}}" bindinput="onBudgetInput" bindblur="onSetBudget" data-cat-id="{{item.id}}" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </block>
 </view>

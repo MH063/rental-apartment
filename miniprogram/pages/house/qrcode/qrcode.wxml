@@ -1,13 +1,55 @@
-<view class="container">
-  <view class="card">
-    <text class="title">邀请码</text>
-    <image class="qr" src="{{qrImage}}" mode="aspectFit" wx:if="{{qrImage}}" />
-    <text class="code">{{inviteCode}}</text>
-    <text class="tip">将此邀请码或二维码分享给室友</text>
-    <view class="actions">
-      <button class="btn-outline" bindtap="onShare">复制邀请码</button>
-      <button class="btn-outline" bindtap="onRenew">重新生成</button>
-    </view>
-    <navigator url="/pages/house/join/join" class="link">我也要加入其他房屋</navigator>
+<view class="page">
+  <view class="hero">
+    <text class="hero-icon">🏠</text>
+    <text class="hero-title">{{house ? house.name : '邀请码'}}</text>
+    <text class="hero-desc" wx:if="{{house && house.unit_type && house.area}}">{{house.unit_type}} · {{house.area}}㎡</text>
+    <text class="hero-desc" wx:elif="{{house && house.address}}">{{house.address}}</text>
   </view>
+
+  <view class="card">
+
+    <view wx:if="{{loading}}" class="loading-wrap">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{error}}" class="error-wrap">
+      <text class="error-icon">⚠️</text>
+      <text class="error-text">{{error}}</text>
+      <button class="btn-retry" bindtap="loadCode">重新加载</button>
+    </view>
+
+    <view wx:else class="qr-section">
+      <image class="qr" src="{{qrImage}}" mode="aspectFit" />
+      <text class="qr-tip">扫一扫二维码加入房屋</text>
+
+      <view class="code-box">
+        <text class="code-label">邀请码</text>
+        <text class="code-value">{{inviteCode}}</text>
+        <text class="code-expire" wx:if="{{expireDate}}">有效期至 {{expireDate}}</text>
+      </view>
+
+      <view class="actions">
+        <button class="btn-primary" bindtap="onCopy">复制邀请码</button>
+        <button class="btn-outline" bindtap="onRenew">重新生成</button>
+      </view>
+    </view>
+
+  </view>
+
+  <view class="extra-info" wx:if="{{house}}">
+    <view class="info-row" wx:if="{{house.landlord}}">
+      <text class="info-label">房东</text>
+      <text class="info-value">{{house.landlord}}</text>
+    </view>
+    <view class="info-row" wx:if="{{rentDisplay}}">
+      <text class="info-label">月租金</text>
+      <text class="info-value">{{rentDisplay}}</text>
+    </view>
+    <view class="info-row" wx:if="{{house.notes}}">
+      <text class="info-label">备注</text>
+      <text class="info-value">{{house.notes}}</text>
+    </view>
+  </view>
+
+  <button open-type="share" class="btn-share">分享给好友</button>
 </view>

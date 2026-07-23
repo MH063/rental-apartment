@@ -28,6 +28,14 @@ houses.post("/houses", async (c) => {
     "INSERT INTO members (house_id, user_id, role) VALUES (?, ?, '寝室长')"
   ).bind(houseId, userId).run()
 
+  // 创建房屋时自动生成默认类目
+  const defaultCategories = ["水费", "电费", "燃气费", "房租", "网络费", "物业费", "其他"]
+  for (let i = 0; i < defaultCategories.length; i++) {
+    await c.env.DB.prepare(
+      "INSERT INTO categories (house_id, name, sort_order) VALUES (?, ?, ?)"
+    ).bind(houseId, defaultCategories[i], i + 1).run()
+  }
+
   const house = await c.env.DB.prepare("SELECT * FROM houses WHERE id = ?").bind(houseId).first()
   return c.json({ success: true, data: house })
 })
@@ -225,7 +233,8 @@ houses.post("/houses/:id/join", async (c) => {
     ).bind(houseId, userId).run()
   }
 
-  return c.json({ success: true, data: {} })
+  // 统一返回 house_id，与 POST /houses/join 保持一致
+  return c.json({ success: true, data: { house_id: houseId } })
 })
 
 // Leave house

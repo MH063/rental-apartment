@@ -1,3 +1,4 @@
+.qr { width: 300rpx; height: 300rpx; margin: 20rpx auto; display: block; }
 .container { padding: 60rpx 30rpx; }
 .card { background: #fff; padding: 40rpx; border-radius: 28rpx; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); text-align: center; }
 .title { font-size: 28rpx; color: #999; display: block; }

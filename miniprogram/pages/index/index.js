@@ -19,9 +19,9 @@ Page({
     try {
       const [summary, unpaid] = await Promise.all([
         request({ url: `/api/houses/${houseId}/stats/trend` }),
-        request({ url: `/api/houses/${houseId}/bills`, data: { status: '待支付' } }),
+        request({ url: `/api/bills`, data: { house_id: houseId, status: '待支付' } }),
       ])
-      this.setData({ summary, unpaidCount: unpaid?.length || 0 })
+      this.setData({ summary, unpaidCount: unpaid?.items?.length || 0 })
     } catch { /* silent */ }
   },
 })

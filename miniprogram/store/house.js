@@ -33,6 +33,7 @@ async function loadCategories() {
 
 function switchHouse(id) {
   getApp().globalData.currentHouseId = id
+  wx.setStorageSync('currentHouseId', id)
   const currentHouse = houseStore.state.houses.find(h => h.id === id)
   houseStore.setState({ currentHouseId: id, currentHouse })
   loadMembers()

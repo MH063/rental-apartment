@@ -1,43 +1,88 @@
 <view class="container">
+  <!-- 用户信息卡片 -->
   <view class="user-card">
     <image class="avatar" src="{{(auth.user && auth.user.avatar) || '/assets/default-avatar.png'}}" />
-    <text class="nickname">{{(auth.user && auth.user.nickname) || '未登录'}}</text>
-  </view>
-
-  <view class="menu-section">
-    <text class="section-title">当前房屋</text>
-    <view wx:for="{{house.houses}}" wx:key="id" class="house-item" bindtap="onSwitchHouse" data-id="{{item.id}}">
-      <text>{{item.name}}</text>
-      <text class="check" wx:if="{{item.id === house.currentHouseId}}">✓</text>
+    <view class="user-info">
+      <text class="nickname">{{auth.user ? (auth.user.nickname || '用户') : '未登录'}}</text>
+      <text class="user-id" wx:if="{{auth.user}}">ID: {{auth.user.id || auth.user.openid}}</text>
     </view>
   </view>
 
-  <view class="menu-section">
-    <navigator url="/pages/payment-methods/index/index" class="menu-item">
-      <text>支付方式</text>
+  <!-- 当前房屋 -->
+  <view class="card-section" wx:if="{{house.houses && house.houses.length > 0}}">
+    <text class="section-title">当前房屋</text>
+    <view wx:for="{{house.houses}}" wx:key="id" class="house-item {{item.id === house.currentHouseId ? 'active' : ''}}" bindtap="onSwitchHouse" data-id="{{item.id}}" hover-class="item-hover">
+      <view class="house-info">
+        <text class="house-name">{{item.name}}</text>
+        <text class="house-address" wx:if="{{item.address}}">{{item.address}}</text>
+      </view>
+      <view class="house-badge" wx:if="{{item.id === house.currentHouseId}}">当前</view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="card-section">
+    <text class="section-title">房屋管理</text>
+    <navigator url="/pages/house/create/create" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-create">🏠</view>
+        <text class="menu-text">创建房屋</text>
+      </view>
       <text class="arrow">›</text>
     </navigator>
-    <navigator url="/pages/house/create/create" class="menu-item">
-      <text>创建房屋</text>
+    <navigator url="/pages/house/join/join" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-join">🔑</view>
+        <text class="menu-text">加入房屋</text>
+      </view>
       <text class="arrow">›</text>
     </navigator>
-    <navigator url="/pages/house/join/join" class="menu-item">
-      <text>加入房屋</text>
-      <text class="arrow">›</text>
-    </navigator>
-    <navigator url="/pages/config/config" class="menu-item">
-      <text>设置</text>
-      <text class="arrow">›</text>
-    </navigator>
-    <navigator url="/pages/bills/my/my" class="menu-item">
-      <text>我的账单</text>
-      <text class="arrow">›</text>
-    </navigator>
-    <navigator url="/pages/notification/notification" class="menu-item">
-      <text>通知</text>
+    <navigator url="/pages/house/qrcode/qrcode" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-qrcode">📱</view>
+        <text class="menu-text">房屋二维码</text>
+      </view>
       <text class="arrow">›</text>
     </navigator>
   </view>
 
-  <button class="logout" bindtap="onLogout">退出登录</button>
+  <!-- 账单与通知 -->
+  <view class="card-section">
+    <text class="section-title">账单与通知</text>
+    <navigator url="/pages/bills/my/my" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-bill">📋</view>
+        <text class="menu-text">我的账单</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/notification/notification" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-notif">🔔</view>
+        <text class="menu-text">通知中心</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+  </view>
+
+  <!-- 设置 -->
+  <view class="card-section">
+    <text class="section-title">设置</text>
+    <navigator url="/pages/config/config" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-config">⚙️</view>
+        <text class="menu-text">预算与房屋设置</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/payment-methods/index/index" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-payment">💳</view>
+        <text class="menu-text">支付方式</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+  </view>
+
+  <button class="logout-btn" bindtap="onLogout">退出登录</button>
 </view>

@@ -1,7 +1,7 @@
 const { request } = require('../utils/request')
 
 async function createSettlement(houseId, data) {
-  return request({ url: `/api/houses/${houseId}/settlements`, method: 'POST', data })
+  return request({ url: '/api/settlements', method: 'POST', data: { house_id: houseId, ...data } })
 }
 
 async function getSettlement(id) {
@@ -9,7 +9,7 @@ async function getSettlement(id) {
 }
 
 async function listSettlements(houseId) {
-  return request({ url: `/api/houses/${houseId}/settlements` })
+  return request({ url: '/api/settlements', data: { house_id: houseId } })
 }
 
 async function confirmSettlement(id) {

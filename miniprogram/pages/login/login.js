@@ -9,7 +9,8 @@ Page({
       if (!code) return wx.showToast({ title: '登录失败', icon: 'none' })
       await login(code)
       await loadProfile()
-      wx.redirectTo({ url: '/pages/index/index' })
+      // index 为 tabBar 页面，必须使用 switchTab 跳转
+      wx.switchTab({ url: '/pages/index/index' })
     } catch (e) {
       wx.showToast({ title: '登录失败，请重试', icon: 'none' })
     } finally {

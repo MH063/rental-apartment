@@ -1,6 +1,98 @@
-.container { padding: 30rpx; }
-.form { background: #fff; padding: 40rpx; border-radius: 28rpx; box-shadow: 0 24rpx 56rpx rgba(79,70,229,.22); }
-.field { margin-bottom: 32rpx; }
-.label { font-size: 28rpx; color: #666; margin-bottom: 12rpx; display: block; }
-.input { background: #f5f5f5; padding: 24rpx; border-radius: 16rpx; font-size: 28rpx; width: 100%; box-sizing: border-box; }
-.btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; border: none; border-radius: 16rpx; padding: 24rpx; font-size: 32rpx; margin-top: 20rpx; }
+.container {
+  min-height: 100vh;
+  padding: 60rpx 30rpx;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #f8f7ff 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.card {
+  background: #fff;
+  padding: 48rpx 40rpx;
+  border-radius: 28rpx;
+  box-shadow: 0 24rpx 56rpx rgba(79, 70, 229, 0.14);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1f2937;
+  display: block;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #9ca3af;
+  margin-top: 12rpx;
+  display: block;
+}
+
+.form {
+  margin-bottom: 48rpx;
+}
+
+.field {
+  margin-bottom: 36rpx;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input {
+  background: #f3f4f6;
+  padding: 28rpx 24rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  color: #111827;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 88rpx;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+  font-size: 28rpx;
+}
+
+.hint {
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-top: 12rpx;
+  display: block;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  width: 100%;
+  line-height: 1.4;
+}
+
+.btn-primary::after {
+  border: none;
+}

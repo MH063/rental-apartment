@@ -1,20 +1,36 @@
 <view class="container">
+  <!-- 已有支付方式列表 -->
   <view wx:for="{{methods}}" wx:key="id" class="method-card">
     <view class="info">
       <text class="type">{{item.type}}</text>
       <text class="account">{{item.account}}</text>
     </view>
-    <view class="badge" wx:if="{{item.is_default}}">默认</view>
-    <view class="ops">
-      <button class="tag" bindtap="onSetDefault" data-id="{{item.id}}">设为默认</button>
-      <button class="tag danger" bindtap="onDelete" data-id="{{item.id}}">删除</button>
+    <view class="right">
+      <view class="badge" wx:if="{{item.is_default}}">默认</view>
+      <view class="ops">
+        <button class="tag" bindtap="onSetDefault" data-id="{{item.id}}">设为默认</button>
+        <button class="tag danger" bindtap="onDelete" data-id="{{item.id}}">删除</button>
+      </view>
     </view>
   </view>
-  <view wx:if="{{showForm}}" class="form">
-    <input class="input" placeholder="类型（支付宝/微信/银行卡）" model:value="{{type}}" />
-    <input class="input" placeholder="账号" model:value="{{account}}" />
+
+  <!-- 添加支付方式表单 -->
+  <view wx:if="{{showForm}}" class="form-card">
+    <view class="form-title">添加支付方式</view>
+
+    <view class="field">
+      <text class="label">支付类型 <text class="required">*</text></text>
+      <input class="input" placeholder="支付宝 / 微信 / 银行卡" model:value="{{type}}" maxlength="20" />
+    </view>
+
+    <view class="field">
+      <text class="label">账号 <text class="required">*</text></text>
+      <input class="input" placeholder="请输入收款账号" model:value="{{account}}" maxlength="80" />
+    </view>
+
     <button class="btn-primary" bindtap="onAdd">保存</button>
   </view>
+
   <button class="btn-outline" bindtap="onToggleForm">{{showForm ? '取消' : '添加支付方式'}}</button>
   <view wx:if="{{methods.length === 0 && !showForm}}" class="empty">暂无支付方式</view>
 </view>

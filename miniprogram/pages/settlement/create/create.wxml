@@ -1,7 +1,21 @@
 <view class="container">
   <view class="card">
     <text class="title">生成结算</text>
-    <text class="desc">系统将统计所有已确认的账单，自动计算每人应付/应收金额</text>
+    <text class="desc">系统将统计指定日期内所有已确认的账单，自动计算每人应付/应收金额</text>
+
+    <view class="date-field">
+      <text class="date-label">开始日期</text>
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker">{{startDate}}</view>
+      </picker>
+    </view>
+    <view class="date-field">
+      <text class="date-label">结束日期</text>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker">{{endDate}}</view>
+      </picker>
+    </view>
+
     <button class="btn-primary" bindtap="onCreate" disabled="{{loading}}">
       <text wx:if="{{loading}}">计算中...</text>
       <text wx:else>开始结算</text>

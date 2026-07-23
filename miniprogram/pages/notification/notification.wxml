@@ -1,11 +1,16 @@
 <view class="container">
   <view class="header-bar">
     <text class="title">通知中心</text>
-    <button class="read-btn" bindtap="onRead">全部已读</button>
+    <button class="read-btn" bindtap="onRead" disabled="{{loading || notifications.length === 0}}">
+      {{loading ? '处理中...' : '全部已读'}}
+    </button>
   </view>
-  <view wx:for="{{notifications}}" wx:key="id" class="notif-card">
-    <text class="notif-text">{{item.content || item.message}}</text>
-    <text class="notif-time">{{item.created_at || item.time}}</text>
+  <view wx:for="{{notifications}}" wx:key="id" class="notif-card {{!item.is_read ? 'unread' : ''}}">
+    <view class="notif-dot" wx:if="{{!item.is_read}}"></view>
+    <view class="notif-body">
+      <text class="notif-text">{{item.content || item.message}}</text>
+      <text class="notif-time">{{item.created_at || item.time}}</text>
+    </view>
   </view>
   <view wx:if="{{notifications.length === 0}}" class="empty">暂无通知</view>
 </view>

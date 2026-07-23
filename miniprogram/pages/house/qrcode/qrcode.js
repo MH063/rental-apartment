@@ -1,7 +1,7 @@
 const { request } = require('../../../utils/request')
 
 Page({
-  data: { inviteCode: '', qrData: '' },
+  data: { inviteCode: '', qrData: '', qrImage: '' },
   onShow() {
     this.loadCode()
   },
@@ -9,9 +9,11 @@ Page({
     const houseId = getApp().globalData.currentHouseId
     if (!houseId) return
     const res = await request({ url: `/api/houses/${houseId}` })
+    const text = `invite:${res.invite_code}`
     this.setData({
       inviteCode: res.invite_code,
-      qrData: `invite:${res.invite_code}`
+      qrData: text,
+      qrImage: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`,
     })
   },
   onShare() {
@@ -24,8 +26,14 @@ Page({
       success: async (res) => {
         if (res.confirm) {
           const houseId = getApp().globalData.currentHouseId
-          const data = await request({ url: `/api/houses/${houseId}/invite-code`, method: 'POST' })
-          this.setData({ inviteCode: data.invite_code, qrData: `invite:${data.invite_code}` })
+          // 后端路由为 POST /api/houses/:id/invite-code/renew
+          const data = await request({ url: `/api/houses/${houseId}/invite-code/renew`, method: 'POST' })
+          const text = `invite:${data.invite_code}`
+          this.setData({
+            inviteCode: data.invite_code,
+            qrData: text,
+            qrImage: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`,
+          })
           wx.showToast({ title: '已重新生成' })
         }
       }

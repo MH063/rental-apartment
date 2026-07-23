@@ -5,30 +5,51 @@ const billStore = createStore({
   bills: [],
   page: 1,
   hasMore: true,
+  cursor: null,
   filters: { status: '', category_id: '', keyword: '' },
   summary: null,
 })
 
+/**
+ * 加载账单列表
+ * 后端 /api/bills 接口返回 { items, next_cursor } 结构，支持游标分页
+ * @param {boolean} reset - 是否重置到第一页
+ */
 async function loadBills(reset = false) {
   const houseId = getApp().globalData.currentHouseId
   if (!houseId) return
 
-  const { filters, page, hasMore } = billStore.state
+  const { filters, cursor, hasMore } = billStore.state
   if (!reset && !hasMore) return
 
-  const p = reset ? 1 : page
-  const params = { ...filters, page: p, page_size: 20 }
-  const res = await request({ url: `/api/houses/${houseId}/bills`, data: params })
+  // 构造查询参数：house_id 必传，游标仅在加载下一页时传
+  const params = { house_id: houseId, ...filters, limit: 20 }
+  if (!reset && cursor) {
+    params.cursor = cursor
+  }
+
+  const res = await request({ url: '/api/bills', data: params })
+
+  // 后端返回 { items, next_cursor } 结构
+  const items = res.items || []
+  const nextCursor = res.next_cursor || null
 
   billStore.setState({
-    bills: reset ? (res.list || res) : [...billStore.state.bills, ...(res.list || res)],
-    page: p + 1,
-    hasMore: (res.list || res).length >= 20,
+    bills: reset ? items : [...billStore.state.bills, ...items],
+    cursor: nextCursor,
+    page: reset ? 1 : billStore.state.page + 1,
+    hasMore: items.length >= 20 && !!nextCursor,
   })
 }
 
 function setBillFilter(filters) {
-  billStore.setState({ filters: { ...billStore.state.filters, ...filters }, bills: [], page: 1, hasMore: true })
+  billStore.setState({
+    filters: { ...billStore.state.filters, ...filters },
+    bills: [],
+    page: 1,
+    hasMore: true,
+    cursor: null,
+  })
   loadBills(true)
 }
 

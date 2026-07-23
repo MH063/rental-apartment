@@ -1,8 +1,9 @@
 <view class="container">
   <view class="card">
     <text class="title">邀请码</text>
+    <image class="qr" src="{{qrImage}}" mode="aspectFit" wx:if="{{qrImage}}" />
     <text class="code">{{inviteCode}}</text>
-    <text class="tip">将此邀请码分享给室友</text>
+    <text class="tip">将此邀请码或二维码分享给室友</text>
     <view class="actions">
       <button class="btn-outline" bindtap="onShare">复制邀请码</button>
       <button class="btn-outline" bindtap="onRenew">重新生成</button>

@@ -1,13 +1,23 @@
 <view class="container">
-  <view class="form">
-    <view class="field">
-      <text class="label">房屋名称</text>
-      <input class="input" placeholder="例如：幸福小区3栋503" model:value="{{name}}" />
+  <view class="card">
+    <view class="header">
+      <text class="title">创建合租房屋</text>
+      <text class="subtitle">创建后系统将自动生成邀请码</text>
     </view>
-    <view class="field">
-      <text class="label">地址（可选）</text>
-      <input class="input" placeholder="小区名称或地址" model:value="{{address}}" />
+
+    <view class="form">
+      <view class="field">
+        <text class="label">房屋名称 <text class="required">*</text></text>
+        <input class="input" placeholder="请输入房屋名称" model:value="{{name}}" maxlength="50" />
+        <text class="hint">例如：幸福小区3栋503</text>
+      </view>
+
+      <view class="field">
+        <text class="label">地址</text>
+        <input class="input" placeholder="请输入小区名称或地址（选填）" model:value="{{address}}" maxlength="100" />
+      </view>
     </view>
+
     <button class="btn-primary" bindtap="onSubmit">创建房屋</button>
   </view>
 </view>

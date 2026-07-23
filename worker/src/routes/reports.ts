@@ -1,12 +1,19 @@
 import { Hono } from "hono"
 import type { AppEnv, AuthVariables } from "../types"
 import { authMiddleware } from "../middleware/auth"
+import { requireHouseMember } from "../utils/authz"
 
 export const reports = new Hono<{ Bindings: AppEnv; Variables: AuthVariables }>()
 reports.use("*", authMiddleware)
 
+// 自定义报表（需校验成员资格防止 IDOR）
 reports.get("/houses/:id/reports", async (c) => {
+  const { userId } = c.var.user
   const houseId = Number(c.req.param("id"))
+
+  const member = await requireHouseMember(c.env.DB, houseId, userId)
+  if (!member) return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
+
   const startDate = c.req.query("start_date") ?? dateMonthsAgo(3)
   const endDate = c.req.query("end_date") ?? today()
 

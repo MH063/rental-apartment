@@ -5,7 +5,13 @@ import { authMiddleware } from "../middleware/auth"
 export const seed = new Hono<{ Bindings: AppEnv; Variables: AuthVariables }>()
 seed.use("*", authMiddleware)
 
+// 生成测试数据（仅开发环境可用，生产环境禁止调用）
 seed.post("/seed/test-data", async (c) => {
+  // 防止生产环境被任意用户调用污染数据库
+  if (c.env.ENVIRONMENT !== "development") {
+    return c.json({ success: false, error: "ERR_COMMON_FORBIDDEN" }, 403)
+  }
+
   const { userId } = c.var.user
 
   // Create house

@@ -8,7 +8,7 @@ Page({
   async load() {
     const houseId = getApp().globalData.currentHouseId
     if (!houseId) return
-    const settlements = await request({ url: `/api/houses/${houseId}/settlements` })
+    const settlements = await request({ url: '/api/settlements', data: { house_id: houseId } })
     this.setData({ settlements })
   },
   onTap(e) {

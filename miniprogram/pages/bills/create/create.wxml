@@ -2,7 +2,7 @@
   <view class="form">
     <view class="field">
       <text class="label">账单标题</text>
-      <input class="input" placeholder="例如：7月电费" model:value="{{title}}" />
+      <input class="input" placeholder="例如：7月电费" model:value="{{title}}" maxlength="100" />
     </view>
     <view class="field">
       <text class="label">金额（元）</text>
@@ -14,25 +14,65 @@
         <view class="picker">{{billDate}}</view>
       </picker>
     </view>
+
     <view class="field">
       <text class="label">分类</text>
-      <picker mode="selector" range="{{categories}}" range-key="name" bindchange="onCategoryChange">
-        <view class="picker">{{selectedCategoryName}}</view>
-      </picker>
+      <view class="category-grid">
+        <view
+          wx:for="{{categories}}"
+          wx:key="id"
+          class="cat-cell {{categoryId === item.id ? 'active' : ''}}"
+          bindtap="onCategoryTap"
+          data-id="{{item.id}}"
+          hover-class="cat-cell-press"
+        >
+          <text class="cat-name">{{item.name}}</text>
+        </view>
+      </view>
     </view>
+
     <view class="field">
       <text class="label">分摊方式</text>
       <picker mode="selector" range="{{['均摊','权重','天数','用量','面积','阶梯']}}" bindchange="onSplitTypeChange">
         <view class="picker">{{splitType}}</view>
       </picker>
     </view>
-    <view class="field" wx:if="{{splitType !== '均摊'}}">
-      <text class="label">分摊明细（{{splitType}}）</text>
-      <view wx:for="{{members}}" wx:key="user_id" class="split-row">
-        <text>{{item.nickname || item.user_name}}</text>
-        <input class="split-input" type="digit" value="{{item.weight || item.days || item.usage || item.area}}" bindinput="onSplitChange" data-field="{{splitType === '权重' ? 'weight' : splitType === '天数' ? 'days' : splitType === '用量' ? 'usage' : 'area'}}" data-idx="{{index}}" />
+
+    <view class="field">
+      <view class="member-header">
+        <text class="label">选择分摊成员</text>
+        <text class="toggle-all" bindtap="onToggleAll">{{selectedMemberIds.length === members.length ? '取消全选' : '全选'}}</text>
+      </view>
+      <view class="member-list">
+        <view
+          wx:for="{{members}}"
+          wx:key="user_id"
+          class="member-item {{selectedMemberIds.indexOf(item.user_id) >= 0 ? 'selected' : ''}}"
+          bindtap="onToggleMember"
+          data-user-id="{{item.user_id}}"
+          hover-class="member-item-press"
+        >
+          <view class="checkbox {{selectedMemberIds.indexOf(item.user_id) >= 0 ? 'checked' : ''}}">
+            <text wx:if="{{selectedMemberIds.indexOf(item.user_id) >= 0}}" class="check-icon">✓</text>
+          </view>
+          <view class="member-info">
+            <text class="member-name">{{item.nickname || item.user_name || '成员'}}</text>
+            <text class="member-role">{{item.role}}</text>
+          </view>
+        </view>
       </view>
     </view>
+
+    <view class="field" wx:if="{{selectedMemberIds.length > 0}}">
+      <text class="label">分摊明细（{{splitType}}）</text>
+      <view wx:if="{{splitType === '均摊'}}" class="split-hint">已选{{selectedMemberIds.length}}人，每人平分金额</view>
+      <view wx:for="{{members}}" wx:key="user_id" wx:if="{{selectedMemberIds.indexOf(item.user_id) >= 0}}" class="split-row">
+        <text class="split-name">{{item.nickname || item.user_name || '成员'}}</text>
+        <input wx:if="{{splitType !== '均摊'}}" class="split-input" type="digit" value="{{item.weight || item.days || item.usage || item.area}}" bindinput="onSplitChange" data-field="{{splitType === '权重' ? 'weight' : splitType === '天数' ? 'days' : splitType === '用量' ? 'usage' : 'area'}}" data-idx="{{index}}" />
+        <text wx:else class="split-text">均摊</text>
+      </view>
+    </view>
+
     <button class="btn-primary" bindtap="onSubmit">创建账单</button>
   </view>
 </view>

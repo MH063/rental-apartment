@@ -11,7 +11,7 @@ const settlementStore = createStore({
 async function loadSettlements() {
   const houseId = getApp().globalData.currentHouseId
   if (!houseId) return
-  const settlements = await request({ url: `/api/houses/${houseId}/settlements` })
+  const settlements = await request({ url: '/api/settlements', data: { house_id: houseId } })
   settlementStore.setState({ settlements })
 }
 
@@ -22,7 +22,7 @@ async function loadSettlementDetail(id) {
 
 async function createSettlement(houseId, startDate, endDate) {
   const res = await request({
-    url: `/api/houses/${houseId}/settlements`,
+    url: '/api/settlements',
     method: 'POST',
     data: { house_id: houseId, start_date: startDate, end_date: endDate },
   })

@@ -1,11 +1,42 @@
-.container { padding: 30rpx; }
-.user-card { text-align: center; padding: 40rpx; }
-.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; }
-.nickname { font-size: 32rpx; font-weight: 600; display: block; margin-top: 16rpx; }
-.menu-section { background: #fff; border-radius: 28rpx; padding: 8rpx 0; margin-bottom: 24rpx; box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06); }
-.section-title { font-size: 26rpx; color: #999; padding: 16rpx 24rpx; display: block; }
-.house-item { display: flex; justify-content: space-between; padding: 20rpx 24rpx; font-size: 28rpx; border-bottom: 1rpx solid #f5f5f5; }
-.check { color: #4f46e5; font-weight: 700; }
-.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 24rpx; font-size: 28rpx; border-bottom: 1rpx solid #f5f5f5; }
-.arrow { color: #ccc; font-size: 32rpx; }
-.logout { margin-top: 16rpx; color: #ef4444; background: none; border: 2rpx solid #ef4444; border-radius: 16rpx; padding: 20rpx; font-size: 28rpx; width: 100%; text-align: center; }
+.container { padding: 30rpx; padding-bottom: 60rpx; }
+
+/* 用户卡片 */
+.user-card { display: flex; align-items: center; gap: 24rpx; background: linear-gradient(135deg, #4f46e5, #7c3aed, #8b5cf6); padding: 40rpx; border-radius: 28rpx; margin-bottom: 24rpx; box-shadow: 0 16rpx 40rpx rgba(79,70,229,.3); }
+.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; border: 4rpx solid rgba(255,255,255,.3); }
+.user-info { flex: 1; }
+.nickname { font-size: 36rpx; font-weight: 700; color: #fff; display: block; }
+.user-id { font-size: 22rpx; color: rgba(255,255,255,.7); display: block; margin-top: 6rpx; }
+
+/* 卡片区块 */
+.card-section { background: #fff; border-radius: 28rpx; padding: 8rpx 0; margin-bottom: 24rpx; box-shadow: 0 8rpx 24rpx rgba(0,0,0,.06); overflow: hidden; }
+.section-title { font-size: 24rpx; color: #999; padding: 20rpx 28rpx 8rpx; display: block; }
+
+/* 房屋列表项 */
+.house-item { display: flex; justify-content: space-between; align-items: center; padding: 24rpx 28rpx; border-bottom: 1rpx solid #f5f5f5; transition: all .2s; }
+.house-item:last-child { border-bottom: none; }
+.house-item.active { background: linear-gradient(90deg, #f5f3ff, transparent); }
+.item-hover { background: #f9fafb; }
+.house-info { flex: 1; }
+.house-name { font-size: 30rpx; color: #333; font-weight: 500; display: block; }
+.house-address { font-size: 24rpx; color: #999; display: block; margin-top: 6rpx; }
+.house-badge { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; font-size: 22rpx; padding: 6rpx 20rpx; border-radius: 20rpx; }
+
+/* 菜单项 */
+.menu-item { display: flex; justify-content: space-between; align-items: center; padding: 28rpx; border-bottom: 1rpx solid #f5f5f5; transition: all .2s; }
+.menu-item:last-child { border-bottom: none; }
+.menu-hover { background: #f9fafb; }
+.menu-left { display: flex; align-items: center; gap: 20rpx; }
+.menu-icon { width: 64rpx; height: 64rpx; border-radius: 16rpx; display: flex; align-items: center; justify-content: center; font-size: 32rpx; flex-shrink: 0; }
+.icon-create { background: #dbeafe; }
+.icon-join { background: #d1fae5; }
+.icon-qrcode { background: #e0e7ff; }
+.icon-bill { background: #fef3c7; }
+.icon-notif { background: #fce7f3; }
+.icon-config { background: #f3f4f6; }
+.icon-payment { background: #ede9fe; }
+.menu-text { font-size: 30rpx; color: #333; }
+.arrow { color: #ccc; font-size: 36rpx; }
+
+/* 退出按钮 */
+.logout-btn { margin-top: 16rpx; color: #ef4444; background: #fff; border: 2rpx solid #ef4444; border-radius: 16rpx; padding: 24rpx; font-size: 30rpx; width: 100%; text-align: center; }
+.logout-btn::after { border: none; }

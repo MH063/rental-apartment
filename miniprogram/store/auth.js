@@ -1,5 +1,5 @@
 const { createStore } = require('./store')
-const { request } = require('../utils/request')
+const { request, API_BASE, logout: requestLogout } = require('../utils/request')
 
 const authStore = createStore({
   token: '',
@@ -32,19 +32,24 @@ function logout() {
   const token = authStore.state.token
   if (token) {
     wx.request({
-      url: 'http://localhost:8787/api/auth/logout',
+      // 复用统一的 API_BASE，避免硬编码 localhost（遵守规则14）
+      url: API_BASE + '/api/auth/logout',
       method: 'POST',
       header: { Authorization: 'Bearer ' + token },
       complete: () => {
         wx.removeStorageSync('token')
         wx.removeStorageSync('refresh_token')
+        wx.removeStorageSync('currentHouseId')
+        getApp().globalData.currentHouseId = null
         authStore.setState({ token: '', user: null })
       },
     })
   } else {
-  wx.removeStorageSync('token')
-  wx.removeStorageSync('refresh_token')
-  authStore.setState({ token: '', user: null })
+    wx.removeStorageSync('token')
+    wx.removeStorageSync('refresh_token')
+    wx.removeStorageSync('currentHouseId')
+    getApp().globalData.currentHouseId = null
+    authStore.setState({ token: '', user: null })
   }
 }
 

@@ -194,15 +194,23 @@ bills.get("/bills/:id", async (c) => {
   return c.json({ success: true, data: { ...bill, splits: splits.results } })
 })
 
-// Update bill (only 草稿, only creator)
+// Update bill (only 草稿, only creator, not during active settlement)
 bills.put("/bills/:id", async (c) => {
   const { userId } = c.var.user
   const billId = Number(c.req.param("id"))
 
   const bill = await c.env.DB.prepare(
     "SELECT * FROM bills WHERE id = ? AND creator_id = ? AND status = '草稿'"
-  ).bind(billId, userId).first()
+  ).bind(billId, userId).first<{ house_id: number; bill_date: string }>()
   if (!bill) return c.json({ success: false, error: "ERR_BILL_STATUS_INVALID" }, 400)
+
+  // 校验该账单是否处于进行中的结算单周期内
+  const activeSettlement = await c.env.DB.prepare(
+    "SELECT id FROM settlements WHERE house_id = ? AND status = 'active' AND start_date <= ? AND end_date >= ? LIMIT 1"
+  ).bind(bill.house_id, bill.bill_date, bill.bill_date).first()
+  if (activeSettlement) {
+    return c.json({ success: false, error: "ERR_BILL_IN_ACTIVE_SETTLEMENT" }, 400)
+  }
 
   const body = await c.req.json<Partial<CreateBillInput>>()
 
@@ -250,15 +258,23 @@ bills.put("/bills/:id", async (c) => {
   return c.json({ success: true, data: { ...updated, splits: splits.results } })
 })
 
-// Delete bill (only 草稿, only creator)
+// Delete bill (only 草稿, only creator, not during active settlement)
 bills.delete("/bills/:id", async (c) => {
   const { userId } = c.var.user
   const billId = Number(c.req.param("id"))
 
   const bill = await c.env.DB.prepare(
-    "SELECT id, house_id FROM bills WHERE id = ? AND creator_id = ? AND status = '草稿'"
-  ).bind(billId, userId).first<{ id: number; house_id: number }>()
+    "SELECT id, house_id, bill_date FROM bills WHERE id = ? AND creator_id = ? AND status = '草稿'"
+  ).bind(billId, userId).first<{ id: number; house_id: number; bill_date: string }>()
   if (!bill) return c.json({ success: false, error: "ERR_BILL_STATUS_INVALID" }, 400)
+
+  // 校验该账单是否处于进行中的结算单周期内
+  const activeSettlement = await c.env.DB.prepare(
+    "SELECT id FROM settlements WHERE house_id = ? AND status = 'active' AND start_date <= ? AND end_date >= ? LIMIT 1"
+  ).bind(bill.house_id, bill.bill_date, bill.bill_date).first()
+  if (activeSettlement) {
+    return c.json({ success: false, error: "ERR_BILL_IN_ACTIVE_SETTLEMENT" }, 400)
+  }
 
   await c.env.DB.prepare("DELETE FROM splits WHERE bill_id = ?").bind(billId).run()
   await c.env.DB.prepare("DELETE FROM bills WHERE id = ?").bind(billId).run()

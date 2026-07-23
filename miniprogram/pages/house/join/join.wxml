@@ -7,18 +7,23 @@
 
   <view class="card">
     <view class="code-inputs">
-      <input
+      <view
         wx:for="{{6}}" wx:key="index"
-        class="code-cell {{codeArr[index] ? 'filled' : ''}} {{error ? 'shake' : ''}}"
-        type="number"
-        maxlength="1"
-        value="{{codeArr[index]}}"
-        data-index="{{index}}"
-        bindinput="onInput"
-        bindtap="onTapCell"
-        focus="{{focusIndex === index}}"
-        disabled="{{loading}}"
-      />
+        class="code-cell-wrap {{codeArr[index] ? 'filled' : ''}} {{focusIndex === index ? 'focused' : ''}} {{error ? 'shake' : ''}}"
+      >
+        <text class="code-dot" wx:if="{{!codeArr[index] && focusIndex !== index}}">•</text>
+        <text class="code-digit" wx:elif="{{codeArr[index]}}">{{codeArr[index]}}</text>
+        <input
+          class="code-input"
+          type="number"
+          value="{{codeArr[index]}}"
+          data-index="{{index}}"
+          bindinput="onInput"
+          bindtap="onTapCell"
+          focus="{{focusIndex === index}}"
+          disabled="{{loading}}"
+        />
+      </view>
     </view>
 
     <text class="error-text" wx:if="{{error}}">{{error}}</text>
@@ -28,10 +33,10 @@
       <text wx:else>加入房屋</text>
     </button>
 
-    <navigator url="/pages/scan/scan" class="scan-link">
+    <view class="scan-link" bindtap="onScan">
       <text class="scan-icon">📷</text>
       <text>扫一扫二维码</text>
-    </navigator>
+    </view>
   </view>
 
   <view class="tip">

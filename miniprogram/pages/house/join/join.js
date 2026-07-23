@@ -20,23 +20,27 @@ Page({
 
   onInput(e) {
     const index = Number(e.currentTarget.dataset.index)
-    let value = e.detail.value
-    value = value.replace(/\D/g, '').slice(0, 1)
+    let value = e.detail.value.replace(/\D/g, '')
 
+    if (!value) return
+
+    // 粘贴支持：用户粘贴超过1位，自动分配到后续格子
     const codeArr = this.data.codeArr.slice()
-    codeArr[index] = value
-    const code = codeArr.join('')
-
-    let focusIndex = index
-    if (value && index < 5) {
-      focusIndex = index + 1
+    for (let i = 0; i < value.length && index + i < 6; i++) {
+      codeArr[index + i] = value[i]
     }
+    const code = codeArr.join('')
+    const nextIndex = Math.min(index + value.length, 5)
 
-    this.setData({ codeArr, code, focusIndex, error: '' })
+    this.setData({ codeArr, code, focusIndex: code.length < 6 ? Math.min(nextIndex, 5) : 5, error: '' })
   },
 
   onTapCell(e) {
     this.setData({ focusIndex: Number(e.currentTarget.dataset.index), error: '' })
+  },
+
+  onScan() {
+    wx.switchTab({ url: '/pages/scan/scan' })
   },
 
   async onLookup() {

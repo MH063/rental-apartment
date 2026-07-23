@@ -1,23 +1,32 @@
 <view class="container">
+  <view class="hero">
+    <text class="hero-icon">🏠</text>
+    <text class="hero-title">创建你的合租空间</text>
+    <text class="hero-desc">创建后自动生成邀请码，即可邀请室友加入</text>
+  </view>
+
   <view class="card">
-    <view class="header">
-      <text class="title">创建合租房屋</text>
-      <text class="subtitle">创建后系统将自动生成邀请码</text>
-    </view>
-
-    <view class="form">
-      <view class="field">
+    <view class="field {{nameError ? 'field-error' : ''}}">
+      <view class="label-row">
         <text class="label">房屋名称 <text class="required">*</text></text>
-        <input class="input" placeholder="请输入房屋名称" model:value="{{name}}" maxlength="50" />
-        <text class="hint">例如：幸福小区3栋503</text>
+        <text class="counter">{{name.length}}/50</text>
       </view>
-
-      <view class="field">
-        <text class="label">地址</text>
-        <input class="input" placeholder="请输入小区名称或地址（选填）" model:value="{{address}}" maxlength="100" />
-      </view>
+      <input class="input" placeholder="例：幸福小区3栋503" value="{{name}}" bindinput="onNameInput" maxlength="50" />
+      <text class="error" wx:if="{{nameError}}">{{nameError}}</text>
     </view>
 
-    <button class="btn-primary" bindtap="onSubmit">创建房屋</button>
+    <view class="field {{addressError ? 'field-error' : ''}}">
+      <view class="label-row">
+        <text class="label">地址</text>
+        <text class="counter">{{address.length}}/100</text>
+      </view>
+      <input class="input" placeholder="小区名称或详细地址（选填）" value="{{address}}" bindinput="onAddressInput" maxlength="100" />
+      <text class="error" wx:if="{{addressError}}">{{addressError}}</text>
+    </view>
+
+    <button class="btn-primary {{!canSubmit() ? 'btn-disabled' : ''}}" disabled="{{!canSubmit()}}" bindtap="onSubmit">
+      <text wx:if="{{submitting}}">创建中...</text>
+      <text wx:else>创建房屋</text>
+    </button>
   </view>
 </view>

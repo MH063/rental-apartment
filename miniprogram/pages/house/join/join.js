@@ -15,6 +15,7 @@ Page({
       const code = String(opts.code).slice(0, 6)
       const codeArr = code.split('').concat(Array(6 - code.length).fill(''))
       this.setData({ code, codeArr, focusIndex: Math.min(code.length, 5) })
+      setTimeout(() => this.onLookup(), 500)
     }
   },
 

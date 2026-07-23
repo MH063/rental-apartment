@@ -9,7 +9,9 @@ Page({
     wx.scanCode({
       onlyFromCamera: true,
       success(res) {
-        const code = res.result
+        const raw = res.result || ''
+        const match = raw.match(/(?:invite:)?(\d{6})/)
+        const code = match ? match[1] : raw
         if (/^\d{6}$/.test(code)) {
           wx.navigateTo({ url: `/pages/house/join/join?code=${code}` })
         } else {

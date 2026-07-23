@@ -191,6 +191,39 @@
   font-size: 26rpx;
 }
 
+/* Photo */
+.photo-upload {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  border: 2rpx dashed #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.photo-icon {
+  font-size: 48rpx;
+}
+
+.photo-text {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
 /* Button */
 .btn-primary {
   background: linear-gradient(135deg, #6366f1, #818cf8);

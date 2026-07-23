@@ -16,6 +16,7 @@ import { reports } from "./routes/reports"
 import { payments } from "./routes/payments"
 import { notify } from "./routes/notify"
 import { notifications } from "./routes/notifications"
+import { upload } from "./routes/upload"
 import { seed } from "./routes/seed"
 
 export function createRouter(env?: { ENVIRONMENT?: string }) {
@@ -37,6 +38,7 @@ export function createRouter(env?: { ENVIRONMENT?: string }) {
   app.route("/api", payments)
   app.route("/api", notify)
   app.route("/api", notifications)
+  app.route("/api", upload)
 
   // Seed route only in non-production
   if (env?.ENVIRONMENT !== "production") app.route("/api", seed)

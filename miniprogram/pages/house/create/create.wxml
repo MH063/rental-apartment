@@ -102,6 +102,17 @@
       </view>
 
       <view class="field">
+        <text class="label">房屋照片</text>
+        <view class="photo-upload" bindtap="onPickPhoto">
+          <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill" />
+          <view wx:else class="photo-placeholder">
+            <text class="photo-icon">📷</text>
+            <text class="photo-text">点击拍照或选图</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="field">
         <text class="label">备注</text>
         <textarea class="textarea" placeholder="其他需要记录的信息" value="{{notes}}" bindinput="onNotesInput" maxlength="500" />
         <text class="counter">{{notes.length}}/500</text>

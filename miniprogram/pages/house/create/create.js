@@ -21,6 +21,8 @@ Page({
     landlord: '',
     utilityAccounts: '',
     notes: '',
+    photoPath: '',
+    photoUrl: '',
     submitting: false,
     unitTypes: UNIT_TYPES,
   },
@@ -46,6 +48,29 @@ Page({
 
   onUnitTypeCustomInput(e) {
     this.setData({ unitTypeCustom: e.detail.value })
+  },
+
+  async onPickPhoto() {
+    const res = await wx.chooseImage({ count: 1, sizeType: ['compressed'] })
+    if (!res.tempFilePaths.length) return
+    const path = res.tempFilePaths[0]
+    this.setData({ photoPath: path })
+    const fs = wx.getFileSystemManager()
+    const base64 = fs.readFileSync(path, 'base64')
+    this.setData({ submitting: true })
+    try {
+      const up = await request({
+        url: '/api/upload',
+        method: 'POST',
+        data: { image: base64, filename: 'house.jpg' },
+      })
+      this.setData({ photoUrl: up.url })
+      wx.showToast({ title: '照片上传成功', icon: 'success' })
+    } catch {
+      wx.showToast({ title: '照片上传失败', icon: 'none' })
+    } finally {
+      this.setData({ submitting: false })
+    }
   },
 
   onLeaseStartChange(e) {
@@ -88,6 +113,7 @@ Page({
           lease_end: d.leaseEnd || null,
           landlord: d.landlord.trim(),
           utility_accounts: d.utilityAccounts.trim(),
+          photo: d.photoUrl,
           notes: d.notes.trim(),
         },
       })

@@ -1,11 +1,12 @@
 <view class="container">
   <!-- 用户信息卡片 -->
-  <view class="user-card">
+  <view class="user-card" bindtap="onOpenEdit">
     <image class="avatar" src="{{(auth.user && auth.user.avatar) || '/assets/default-avatar.png'}}" />
     <view class="user-info">
       <text class="nickname">{{auth.user ? (auth.user.nickname || '用户') : '未登录'}}</text>
       <text class="user-id" wx:if="{{auth.user}}">ID: {{auth.user.id || auth.user.openid}}</text>
     </view>
+    <text class="edit-hint">编辑 ›</text>
   </view>
 
   <!-- 当前房屋 -->
@@ -20,7 +21,7 @@
     </view>
   </view>
 
-  <!-- 快捷操作 -->
+  <!-- 房屋管理 -->
   <view class="card-section">
     <text class="section-title">房屋管理</text>
     <navigator url="/pages/house/create/create" class="menu-item" hover-class="menu-hover">
@@ -41,6 +42,13 @@
       <view class="menu-left">
         <view class="menu-icon icon-qrcode">📱</view>
         <text class="menu-text">房屋二维码</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+    <navigator url="/pages/members/members" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-members">👥</view>
+        <text class="menu-text">成员管理</text>
       </view>
       <text class="arrow">›</text>
     </navigator>
@@ -84,5 +92,52 @@
     </navigator>
   </view>
 
+  <!-- 关于 -->
+  <view class="card-section">
+    <text class="section-title">关于</text>
+    <navigator url="/pages/profile/about" class="menu-item" hover-class="menu-hover">
+      <view class="menu-left">
+        <view class="menu-icon icon-about">ℹ️</view>
+        <text class="menu-text">关于合租账单</text>
+      </view>
+      <text class="arrow">›</text>
+    </navigator>
+  </view>
+
   <button class="logout-btn" bindtap="onLogout">退出登录</button>
+</view>
+
+<!-- 编辑资料弹窗 -->
+<view wx:if="{{showEdit}}" class="modal-mask" bindtap="onCloseEdit">
+  <view class="modal-box" catchtap="return">
+    <view class="modal-header">
+      <text class="modal-title">编辑资料</text>
+      <text class="modal-close" bindtap="onCloseEdit">✕</text>
+    </view>
+
+    <view class="modal-body">
+      <!-- 头像 -->
+      <view class="field avatar-field">
+        <text class="field-label">头像</text>
+        <view class="avatar-upload" bindtap="onPickAvatar">
+          <image class="avatar-preview" src="{{editAvatarLocal || editAvatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
+          <view class="avatar-overlay">
+            <text wx:if="{{uploading}}" class="avatar-text">上传中...</text>
+            <text wx:else class="avatar-text">更换</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 昵称 -->
+      <view class="field">
+        <text class="field-label">昵称</text>
+        <input class="field-input" placeholder="请输入昵称" value="{{editNickname}}" bindinput="onNicknameInput" maxlength="20" />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="onCloseEdit">取消</button>
+      <button class="btn-save" bindtap="onSaveProfile">保存</button>
+    </view>
+  </view>
 </view>

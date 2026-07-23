@@ -21,7 +21,8 @@
     "pages/reports/reports",
     "pages/notification/notification",
     "pages/payment-methods/index/index",
-    "pages/settlement/challenge/challenge"
+    "pages/settlement/challenge/challenge",
+    "pages/profile/about/about"
   ],
   "tabBar": {
     "list": [

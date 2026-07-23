@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="hero">
+    <view class="logo">🏠</view>
+    <text class="app-name">合租账单</text>
+    <text class="app-version">v{{version}}</text>
+  </view>
+
+  <view class="card">
+    <view class="card-item">
+      <text class="card-label">版本号</text>
+      <text class="card-value">{{version}}</text>
+    </view>
+    <view class="card-item">
+      <text class="card-label">构建时间</text>
+      <text class="card-value">{{buildTime}}</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-item">
+      <text class="card-label">功能介绍</text>
+    </view>
+    <view class="desc-list">
+      <text class="desc-text">• 创建/加入合租房屋，邀请室友</text>
+      <text class="desc-text">• 记录合租账单，自动均摊/按比例分摊</text>
+      <text class="desc-text">• 在线结算，支持争议处理</text>
+      <text class="desc-text">• 收支统计与排行</text>
+      <text class="desc-text">• 预算管理，掌控每月开支</text>
+    </view>
+  </view>
+
+  <text class="footer-text">Made with ❤️ for roommates</text>
+</view>

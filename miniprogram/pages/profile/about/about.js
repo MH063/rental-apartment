@@ -1,0 +1,6 @@
+Page({
+  data: {
+    version: '1.0.0',
+    buildTime: '2026-07',
+  },
+})

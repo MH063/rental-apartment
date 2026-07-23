@@ -95,7 +95,7 @@
   <!-- 关于 -->
   <view class="card-section">
     <text class="section-title">关于</text>
-    <navigator url="/pages/profile/about" class="menu-item" hover-class="menu-hover">
+    <navigator url="/pages/profile/about/about" class="menu-item" hover-class="menu-hover">
       <view class="menu-left">
         <view class="menu-icon icon-about">ℹ️</view>
         <text class="menu-text">关于合租账单</text>
